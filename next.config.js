@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const isProd = process.env.NODE_ENV === 'production'
-const repoName = process.env.GITHUB_REPOSITORY?.split('/')[1] || 'awspirin'
+const isGitHubPages = process.env.GITHUB_ACTIONS === 'true'
+const repoName = 'awspirin' // 저장소 이름을 직접 지정
 
 const nextConfig = {
   output: 'export',
@@ -8,9 +9,15 @@ const nextConfig = {
   images: {
     unoptimized: true
   },
-  // GitHub Pages에서는 저장소 이름이 경로에 포함됩니다
-  basePath: isProd ? `/${repoName}` : '',
-  assetPrefix: isProd ? `/${repoName}/` : '',
+  // GitHub Pages 배포 시에만 basePath 적용
+  ...(isProd && isGitHubPages && {
+    basePath: `/${repoName}`,
+    assetPrefix: `/${repoName}/`,
+  }),
+  // CSS 최적화 비활성화 (정적 export에서 문제가 될 수 있음)
+  experimental: {
+    optimizeCss: false,
+  },
 }
 
 module.exports = nextConfig

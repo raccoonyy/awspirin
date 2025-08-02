@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:github": "GITHUB_ACTIONS=true next build",
     "start": "next start",
     "lint": "next lint"
   },
