@@ -1,0 +1,71 @@
+name: Cleanup Old Previews
+
+on:
+  schedule:
+    # Run every day at 2 AM UTC to cleanup old previews
+    - cron: '0 2 * * *'
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout gh-pages
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get all open PRs
+        id: open-prs
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: prs } = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open'
+            });
+            
+            const openBranches = prs.map(pr => {
+              const branchName = pr.head.ref;
+              return branchName.replace(/[^a-zA-Z0-9]/g, '-').replace(/--+/g, '-').replace(/^-|-$/g, '');
+            });
+            
+            return openBranches;
+
+      - name: Cleanup old preview directories
+        run: |
+          if [ -d "preview" ]; then
+            cd preview
+            for dir in */; do
+              if [ -d "$dir" ]; then
+                dir_name=${dir%/}
+                echo "Checking directory: $dir_name"
+                
+                # Check if this directory corresponds to an open PR
+                open_branches='${{ steps.open-prs.outputs.result }}'
+                if echo "$open_branches" | grep -q "\"$dir_name\""; then
+                  echo "Keeping $dir_name (PR is still open)"
+                else
+                  echo "Removing $dir_name (PR is closed or merged)"
+                  rm -rf "$dir"
+                fi
+              fi
+            done
+            
+            cd ..
+            
+            # Commit changes if any
+            if [ -n "$(git status --porcelain)" ]; then
+              git config --local user.email "action@github.com"
+              git config --local user.name "GitHub Action"
+              git add .
+              git commit -m "Cleanup old preview directories"
+              git push
+            else
+              echo "No changes to commit"
+            fi
+          else
+            echo "No preview directory found"
+          fi
