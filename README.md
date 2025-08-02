@@ -1,10 +1,10 @@
-# AWS IAM Policy Generator
+# AWSpirin for aspirin AWS IAM Policy Generating
 
-시각적으로 AWS IAM 정책을 생성하고 관리할 수 있는 웹 애플리케이션입니다.
+AWS IAM 정책을 (두통 없이) 편리하게 생성할 수 있는 웹 애플리케이션입니다.
 
 ## 🚀 Live Demo
 
-**Production:** [https://your-username.github.io/paws/](https://your-username.github.io/paws/)
+**Production:** [https://raccoonyy.github.io/awspirin/](https://raccoonyy.github.io/awspirin/)
 
 ## ✨ 주요 기능
 

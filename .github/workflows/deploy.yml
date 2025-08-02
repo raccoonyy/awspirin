@@ -35,9 +35,9 @@ jobs:
           if [ -f "package.json" ]; then
             echo "✅ Found package.json in root"
             echo "PROJECT_DIR=." >> $GITHUB_ENV
-          elif [ -f "aws-policy-generator/package.json" ]; then
-            echo "✅ Found package.json in aws-policy-generator/"
-            echo "PROJECT_DIR=aws-policy-generator" >> $GITHUB_ENV
+          elif [ -f "awspirin/package.json" ]; then
+            echo "✅ Found package.json in awspirin/"
+            echo "PROJECT_DIR=awspirin" >> $GITHUB_ENV
           else
             echo "❌ package.json not found!"
             exit 1

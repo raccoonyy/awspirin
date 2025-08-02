@@ -14,7 +14,7 @@ git init
 git add .
 git commit -m "Initial commit"
 git branch -M main
-git remote add origin https://github.com/YOUR_USERNAME/aws-policy-generator.git
+git remote add origin https://github.com/YOUR_USERNAME/awspirin.git
 git push -u origin main
 ```
 
@@ -37,11 +37,11 @@ Repository Settings에서 다음 권한을 확인하세요:
 
 ### Main Branch 배포
 - `main` 브랜치에 코드가 푸시되면 자동으로 배포
-- 배포 URL: `https://YOUR_USERNAME.github.io/aws-policy-generator/`
+- 배포 URL: `https://YOUR_USERNAME.github.io/awspirin/`
 
 ### PR 미리보기 배포
 - 새 PR이 생성되면 자동으로 미리보기 환경 생성
-- 미리보기 URL: `https://YOUR_USERNAME.github.io/aws-policy-generator/preview/BRANCH_NAME/`
+- 미리보기 URL: `https://YOUR_USERNAME.github.io/awspirin/preview/BRANCH_NAME/`
 - PR 코멘트에 미리보기 링크 자동 추가
 
 ### 자동 정리
