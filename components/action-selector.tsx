@@ -8,6 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Input } from "@/components/ui/input"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import { useTranslation } from "@/lib/i18n"
 import type { AWSResource, AWSAction } from "@/app/page"
 
 interface ActionSelectorProps {
@@ -27,7 +28,7 @@ export function ActionSelector({
   onResourceActionsToggle,
   onResourceArnChange,
 }: ActionSelectorProps) {
-
+  const t = useTranslation()
 
   const totalSelectedActions = Object.values(actions)
     .flat()
@@ -46,11 +47,11 @@ export function ActionSelector({
   const getCategoryLabel = (category: string) => {
     switch (category) {
       case "read":
-        return "읽기 권한"
+        return t('actions.categories.read')
       case "write":
-        return "쓰기 권한"
+        return t('actions.categories.write')
       case "admin":
-        return "관리 권한"
+        return t('actions.categories.admin')
       default:
         return category
     }
@@ -85,14 +86,14 @@ export function ActionSelector({
     return (
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 h-full">
         <div className="p-6 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900">작업 선택</h2>
-          <p className="text-sm text-gray-600 mt-1">선택한 리소스에 대해 필요한 권한을 선택하세요.</p>
+          <h2 className="text-xl font-semibold text-gray-900">{t('actions.title')}</h2>
+          <p className="text-sm text-gray-600 mt-1">{t('actions.subtitle')}</p>
         </div>
 
         <div className="p-6">
           <Alert className="border-yellow-200 bg-yellow-50">
             <AlertTriangle className="h-4 w-4 text-yellow-600" />
-            <AlertDescription className="text-yellow-800">리소스를 먼저 선택하세요.</AlertDescription>
+            <AlertDescription className="text-yellow-800">{t('actions.selectResource')}</AlertDescription>
           </Alert>
         </div>
       </div>
@@ -103,14 +104,14 @@ export function ActionSelector({
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 h-full">
         <div className="p-6 border-b border-gray-200">
           <div className="flex items-center justify-between mb-2">
-            <h2 className="text-xl font-semibold text-gray-900">작업 선택</h2>
+            <h2 className="text-xl font-semibold text-gray-900">{t('actions.title')}</h2>
             {totalSelectedActions > 0 && (
               <Badge variant="secondary" className="bg-purple-100 text-purple-800">
-                {totalSelectedActions}개 선택됨
+                {t('actions.selectedCount', { count: totalSelectedActions })}
               </Badge>
             )}
           </div>
-          <p className="text-sm text-gray-600">선택한 리소스에 대해 필요한 권한을 선택하세요.</p>
+          <p className="text-sm text-gray-600">{t('actions.subtitle')}</p>
         </div>
 
         <div className="p-6 overflow-y-auto max-h-[calc(100vh-300px)]">
@@ -130,7 +131,7 @@ export function ActionSelector({
                           <div>
                             <h3 className="font-medium text-gray-900">{resource.name}</h3>
                             <p className="text-xs text-gray-600">
-                              {selectedCount}/{totalCount} 작업 선택됨
+                              {t('actions.actionsSelected', { selected: selectedCount, total: totalCount })}
                             </p>
                           </div>
                         </div>
@@ -143,18 +144,18 @@ export function ActionSelector({
                       {/* ARN 입력 필드 */}
                       <div className="space-y-2">
                         <label htmlFor={`arn-${resource.id}`} className="text-sm font-medium text-gray-700">
-                          {resource.name} ARN (선택사항)
+                          {resource.name} {t('actions.arnLabel')}
                         </label>
                         <Input
                           id={`arn-${resource.id}`}
                           placeholder={
                             resource.id === 's3' 
-                              ? "arn:aws:s3:::my-bucket"
+                              ? t('actions.arnPlaceholder.s3')
                               : resource.id === 'dynamodb'
-                              ? "arn:aws:dynamodb:region:account:table/table-name"
+                              ? t('actions.arnPlaceholder.dynamodb')
                               : resource.id === 'cloudwatch'
-                              ? "arn:aws:logs:region:account:log-group:log-group-name"
-                              : `arn:aws:${resource.id}:region:account:resource`
+                              ? t('actions.arnPlaceholder.cloudwatch')
+                              : t('actions.arnPlaceholder.default').replace('{service}', resource.id)
                           }
                           value={resource.arn || ""}
                           onChange={(e) => onResourceArnChange(resource.id, e.target.value)}
@@ -162,12 +163,12 @@ export function ActionSelector({
                         />
                         <p className="text-xs text-gray-500">
                           {resource.id === 's3' 
-                            ? "S3 버킷 ARN을 입력하면 버킷과 객체(/*) 모두에 대한 권한이 적용됩니다"
+                            ? t('actions.arnHelp.s3')
                             : resource.id === 'dynamodb'
-                            ? "DynamoDB 테이블 ARN을 입력하면 테이블과 인덱스(/*) 모두에 대한 권한이 적용됩니다"
+                            ? t('actions.arnHelp.dynamodb')
                             : resource.id === 'cloudwatch'
-                            ? "CloudWatch 로그 그룹 ARN을 입력하면 로그 그룹과 스트림(:*) 모두에 대한 권한이 적용됩니다"
-                            : "비워두면 모든 리소스(*)에 적용됩니다"
+                            ? t('actions.arnHelp.cloudwatch')
+                            : t('actions.arnHelp.default')
                           }
                         </p>
                       </div>

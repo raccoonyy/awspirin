@@ -5,6 +5,7 @@ import { Copy, Check, AlertCircle, CheckCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { useTranslation } from "@/lib/i18n"
 import type { AWSResource, AWSAction } from "@/app/page"
 
 interface PolicyPreviewProps {
@@ -16,6 +17,7 @@ interface PolicyPreviewProps {
 }
 
 export function PolicyPreview({ selectedResources, selectedActions, getAllAwsActions, getPolicyResources, getPolicyStatements }: PolicyPreviewProps) {
+  const t = useTranslation()
   const [copied, setCopied] = useState(false)
 
   const generatePolicy = () => {
@@ -64,7 +66,7 @@ export function PolicyPreview({ selectedResources, selectedActions, getAllAwsAct
     <Card className="border-gray-200">
       <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg">생성된 정책</CardTitle>
+          <CardTitle className="text-lg">{t('policy.title')}</CardTitle>
           <Button variant="outline" size="sm" onClick={handleCopy} disabled={!policy} className="h-8 bg-transparent">
             {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
           </Button>
@@ -78,12 +80,12 @@ export function PolicyPreview({ selectedResources, selectedActions, getAllAwsAct
               {isValid ? (
                 <Alert className="border-green-200 bg-green-50">
                   <CheckCircle className="h-4 w-4 text-green-600" />
-                  <AlertDescription className="text-green-800">유효한 정책</AlertDescription>
+                  <AlertDescription className="text-green-800">{t('policy.valid')}</AlertDescription>
                 </Alert>
               ) : (
                 <Alert className="border-red-200 bg-red-50">
                   <AlertCircle className="h-4 w-4 text-red-600" />
-                  <AlertDescription className="text-red-800">액션을 선택해주세요.</AlertDescription>
+                  <AlertDescription className="text-red-800">{t('policy.selectActions')}</AlertDescription>
                 </Alert>
               )}
             </div>
@@ -95,19 +97,19 @@ export function PolicyPreview({ selectedResources, selectedActions, getAllAwsAct
             </div>
 
             <div className="mt-4 text-xs text-gray-500">
-              <p>• 총 {selectedActions.length}개의 작업이 선택되었습니다</p>
-              <p>• 실제 AWS 액션 {getAllAwsActions().length}개가 포함되었습니다</p>
-              <p>• Statement {getPolicyStatements().length}개가 생성되었습니다</p>
-              <p>• 리소스: {
+              <p>• {t('policy.summary.totalActions', { count: selectedActions.length })}</p>
+              <p>• {t('policy.summary.awsActions', { count: getAllAwsActions().length })}</p>
+              <p>• {t('policy.summary.statements', { count: getPolicyStatements().length })}</p>
+              <p>• {t('policy.summary.resources.label')}: {
                 (() => {
                   const statements = getPolicyStatements()
                   const hasWildcard = statements.some(s => s.Resource === "*")
                   const hasSpecificArn = statements.some(s => s.Resource !== "*")
                   
-                  if (hasWildcard && hasSpecificArn) return "모든 리소스(*) + 특정 ARN"
-                  if (hasWildcard) return "모든 리소스(*)"
-                  if (hasSpecificArn) return "특정 ARN"
-                  return "없음"
+                  if (hasWildcard && hasSpecificArn) return t('policy.summary.resources.mixed')
+                  if (hasWildcard) return t('policy.summary.resources.allResources')
+                  if (hasSpecificArn) return t('policy.summary.resources.specificArn')
+                  return t('policy.summary.resources.none')
                 })()
               }</p>
             </div>
@@ -117,7 +119,7 @@ export function PolicyPreview({ selectedResources, selectedActions, getAllAwsAct
             <div className="text-gray-400 mb-2">
               <AlertCircle className="h-8 w-8 mx-auto" />
             </div>
-            <p className="text-gray-500 text-sm">작업을 선택하면 정책이 생성됩니다</p>
+            <p className="text-gray-500 text-sm">{t('policy.noActionsSelected')}</p>
           </div>
         )}
       </CardContent>

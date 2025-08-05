@@ -1,9 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { ResourceSelector } from "@/components/resource-selector"
 import { ActionSelector } from "@/components/action-selector"
 import { PolicyPreview } from "@/components/policy-preview"
+import { LanguageSelector } from "@/components/language-selector"
+import { I18nProvider, useI18n, useTranslation } from "@/lib/i18n"
 
 export interface AWSResource {
   id: string
@@ -24,67 +26,66 @@ export interface AWSAction {
   selected: boolean
 }
 
-const initialResources: AWSResource[] = [
+// 리소스 생성 함수 (번역 함수를 받아서 사용)
+const createInitialResources = (t: any): AWSResource[] => [
   {
     id: "s3",
-    name: "S3 (Simple Storage Service)",
-    description: "객체 스토리지 서비스",
+    name: t('resources.services.s3.name'),
+    description: t('resources.services.s3.description'),
     icon: "🪣",
     selected: false,
   },
   {
     id: "ec2",
-    name: "EC2 (Elastic Compute Cloud)",
-    description: "가상 서버 인스턴스",
+    name: t('resources.services.ec2.name'),
+    description: t('resources.services.ec2.description'),
     icon: "🖥️",
     selected: false,
   },
   {
     id: "lambda",
-    name: "Lambda",
-    description: "서버리스 컴퓨팅 서비스",
+    name: t('resources.services.lambda.name'),
+    description: t('resources.services.lambda.description'),
     icon: "⚡",
     selected: false,
   },
   {
     id: "dynamodb",
-    name: "DynamoDB",
-    description: "NoSQL 데이터베이스 서비스",
+    name: t('resources.services.dynamodb.name'),
+    description: t('resources.services.dynamodb.description'),
     icon: "🗄️",
     selected: false,
   },
-
   {
     id: "cloudwatch",
-    name: "CloudWatch",
-    description: "모니터링 및 로깅 서비스",
+    name: t('resources.services.cloudwatch.name'),
+    description: t('resources.services.cloudwatch.description'),
     icon: "📊",
     selected: false,
   },
   {
     id: "sns",
-    name: "SNS (Simple Notification Service)",
-    description: "메시지 알림 서비스",
+    name: t('resources.services.sns.name'),
+    description: t('resources.services.sns.description'),
     icon: "📢",
     selected: false,
   },
   {
     id: "sqs",
-    name: "SQS (Simple Queue Service)",
-    description: "메시지 큐 서비스",
+    name: t('resources.services.sqs.name'),
+    description: t('resources.services.sqs.description'),
     icon: "📬",
     selected: false,
   },
-
-
 ]
 
-const resourceActions: Record<string, AWSAction[]> = {
+// 액션 생성 함수 (번역 함수를 받아서 사용)
+const createResourceActions = (t: any): Record<string, AWSAction[]> => ({
   s3: [
     {
       id: "s3-list-objects",
-      name: "객체 목록 조회",
-      description: "S3 버킷의 객체 목록을 조회합니다",
+      name: t('awsActions.s3.listObjects.name'),
+      description: t('awsActions.s3.listObjects.description'),
       category: "read",
       actions: ["s3:ListBucket"],
       dependencies: ["s3:GetBucketLocation"],
@@ -92,8 +93,8 @@ const resourceActions: Record<string, AWSAction[]> = {
     },
     {
       id: "s3-read-objects",
-      name: "객체 읽기",
-      description: "S3 버킷에서 객체를 읽습니다",
+      name: t('awsActions.s3.readObjects.name'),
+      description: t('awsActions.s3.readObjects.description'),
       category: "read",
       actions: ["s3:GetObject"],
       dependencies: ["s3:ListBucket", "s3:GetBucketLocation"],
@@ -101,16 +102,16 @@ const resourceActions: Record<string, AWSAction[]> = {
     },
     {
       id: "s3-write-objects",
-      name: "객체 업로드/수정",
-      description: "S3 버킷에 객체를 업로드하고 수정합니다",
+      name: t('awsActions.s3.writeObjects.name'),
+      description: t('awsActions.s3.writeObjects.description'),
       category: "write",
       actions: ["s3:PutObject", "s3:PutObjectAcl"],
       selected: false,
     },
     {
       id: "s3-delete-objects",
-      name: "객체 삭제",
-      description: "S3 버킷에서 객체를 삭제합니다",
+      name: t('awsActions.s3.deleteObjects.name'),
+      description: t('awsActions.s3.deleteObjects.description'),
       category: "write",
       actions: ["s3:DeleteObject"],
       dependencies: ["s3:ListBucket"],
@@ -118,8 +119,8 @@ const resourceActions: Record<string, AWSAction[]> = {
     },
     {
       id: "s3-manage-buckets",
-      name: "버킷 관리",
-      description: "S3 버킷을 생성, 삭제, 설정합니다",
+      name: t('awsActions.s3.manageBuckets.name'),
+      description: t('awsActions.s3.manageBuckets.description'),
       category: "admin",
       actions: ["s3:CreateBucket", "s3:DeleteBucket", "s3:PutBucketPolicy", "s3:GetBucketPolicy"],
       selected: false,
@@ -128,16 +129,16 @@ const resourceActions: Record<string, AWSAction[]> = {
   ec2: [
     {
       id: "ec2-view-instances",
-      name: "인스턴스 조회",
-      description: "EC2 인스턴스 정보를 조회합니다",
+      name: t('awsActions.ec2.viewInstances.name'),
+      description: t('awsActions.ec2.viewInstances.description'),
       category: "read",
       actions: ["ec2:DescribeInstances", "ec2:DescribeInstanceStatus"],
       selected: false,
     },
     {
       id: "ec2-control-instances",
-      name: "인스턴스 제어",
-      description: "EC2 인스턴스를 시작, 중지, 재시작합니다",
+      name: t('awsActions.ec2.controlInstances.name'),
+      description: t('awsActions.ec2.controlInstances.description'),
       category: "write",
       actions: ["ec2:StartInstances", "ec2:StopInstances", "ec2:RebootInstances"],
       dependencies: ["ec2:DescribeInstances"],
@@ -145,8 +146,8 @@ const resourceActions: Record<string, AWSAction[]> = {
     },
     {
       id: "ec2-manage-instances",
-      name: "인스턴스 관리",
-      description: "EC2 인스턴스를 생성, 종료합니다",
+      name: t('awsActions.ec2.manageInstances.name'),
+      description: t('awsActions.ec2.manageInstances.description'),
       category: "admin",
       actions: ["ec2:RunInstances", "ec2:TerminateInstances"],
       dependencies: ["ec2:DescribeInstances", "ec2:DescribeImages", "ec2:DescribeSecurityGroups"],
@@ -156,16 +157,16 @@ const resourceActions: Record<string, AWSAction[]> = {
   lambda: [
     {
       id: "lambda-view-functions",
-      name: "함수 조회",
-      description: "Lambda 함수 목록과 정보를 조회합니다",
+      name: t('awsActions.lambda.viewFunctions.name'),
+      description: t('awsActions.lambda.viewFunctions.description'),
       category: "read",
       actions: ["lambda:ListFunctions", "lambda:GetFunction"],
       selected: false,
     },
     {
       id: "lambda-invoke-functions",
-      name: "함수 실행",
-      description: "Lambda 함수를 실행합니다",
+      name: t('awsActions.lambda.invokeFunctions.name'),
+      description: t('awsActions.lambda.invokeFunctions.description'),
       category: "write",
       actions: ["lambda:InvokeFunction"],
       dependencies: ["lambda:GetFunction"],
@@ -173,8 +174,8 @@ const resourceActions: Record<string, AWSAction[]> = {
     },
     {
       id: "lambda-manage-functions",
-      name: "함수 관리",
-      description: "Lambda 함수를 생성, 수정, 삭제합니다",
+      name: t('awsActions.lambda.manageFunctions.name'),
+      description: t('awsActions.lambda.manageFunctions.description'),
       category: "admin",
       actions: ["lambda:CreateFunction", "lambda:UpdateFunctionCode", "lambda:DeleteFunction"],
       dependencies: ["iam:PassRole"],
@@ -184,32 +185,32 @@ const resourceActions: Record<string, AWSAction[]> = {
   dynamodb: [
     {
       id: "dynamodb-read-data",
-      name: "데이터 읽기",
-      description: "DynamoDB 테이블에서 데이터를 읽고 쿼리합니다",
+      name: t('awsActions.dynamodb.readData.name'),
+      description: t('awsActions.dynamodb.readData.description'),
       category: "read",
       actions: ["dynamodb:GetItem", "dynamodb:Query", "dynamodb:Scan"],
       selected: false,
     },
     {
       id: "dynamodb-write-data",
-      name: "데이터 쓰기",
-      description: "DynamoDB 테이블에 데이터를 생성, 수정합니다",
+      name: t('awsActions.dynamodb.writeData.name'),
+      description: t('awsActions.dynamodb.writeData.description'),
       category: "write",
       actions: ["dynamodb:PutItem", "dynamodb:UpdateItem"],
       selected: false,
     },
     {
       id: "dynamodb-delete-data",
-      name: "데이터 삭제",
-      description: "DynamoDB 테이블에서 데이터를 삭제합니다",
+      name: t('awsActions.dynamodb.deleteData.name'),
+      description: t('awsActions.dynamodb.deleteData.description'),
       category: "write",
       actions: ["dynamodb:DeleteItem"],
       selected: false,
     },
     {
       id: "dynamodb-manage-tables",
-      name: "테이블 관리",
-      description: "DynamoDB 테이블을 생성, 수정, 삭제합니다",
+      name: t('awsActions.dynamodb.manageTables.name'),
+      description: t('awsActions.dynamodb.manageTables.description'),
       category: "admin",
       actions: ["dynamodb:CreateTable", "dynamodb:UpdateTable", "dynamodb:DeleteTable", "dynamodb:DescribeTable"],
       selected: false,
@@ -218,8 +219,8 @@ const resourceActions: Record<string, AWSAction[]> = {
   sns: [
     {
       id: "sns-publish-messages",
-      name: "메시지 발행",
-      description: "SNS 토픽에 메시지를 발행합니다",
+      name: t('awsActions.sns.publishMessages.name'),
+      description: t('awsActions.sns.publishMessages.description'),
       category: "write",
       actions: ["sns:Publish"],
       dependencies: ["sns:GetTopicAttributes"],
@@ -227,8 +228,8 @@ const resourceActions: Record<string, AWSAction[]> = {
     },
     {
       id: "sns-manage-subscriptions",
-      name: "구독 관리",
-      description: "SNS 토픽의 구독을 관리합니다",
+      name: t('awsActions.sns.manageSubscriptions.name'),
+      description: t('awsActions.sns.manageSubscriptions.description'),
       category: "write",
       actions: ["sns:Subscribe", "sns:Unsubscribe", "sns:ConfirmSubscription"],
       dependencies: ["sns:ListSubscriptionsByTopic"],
@@ -236,8 +237,8 @@ const resourceActions: Record<string, AWSAction[]> = {
     },
     {
       id: "sns-manage-topics",
-      name: "토픽 관리",
-      description: "SNS 토픽을 생성, 수정, 삭제합니다",
+      name: t('awsActions.sns.manageTopics.name'),
+      description: t('awsActions.sns.manageTopics.description'),
       category: "admin",
       actions: ["sns:CreateTopic", "sns:DeleteTopic", "sns:SetTopicAttributes"],
       selected: false,
@@ -246,16 +247,16 @@ const resourceActions: Record<string, AWSAction[]> = {
   cloudwatch: [
     {
       id: "cloudwatch-view-metrics",
-      name: "메트릭 조회",
-      description: "CloudWatch 메트릭을 조회합니다",
+      name: t('awsActions.cloudwatch.viewMetrics.name'),
+      description: t('awsActions.cloudwatch.viewMetrics.description'),
       category: "read",
       actions: ["cloudwatch:GetMetricStatistics", "cloudwatch:ListMetrics"],
       selected: false,
     },
     {
       id: "cloudwatch-manage-alarms",
-      name: "알람 관리",
-      description: "CloudWatch 알람을 생성, 수정, 삭제합니다",
+      name: t('awsActions.cloudwatch.manageAlarms.name'),
+      description: t('awsActions.cloudwatch.manageAlarms.description'),
       category: "write",
       actions: ["cloudwatch:PutMetricAlarm", "cloudwatch:DeleteAlarms"],
       dependencies: ["cloudwatch:DescribeAlarms"],
@@ -263,8 +264,8 @@ const resourceActions: Record<string, AWSAction[]> = {
     },
     {
       id: "cloudwatch-manage-logs",
-      name: "로그 관리",
-      description: "CloudWatch 로그를 관리합니다",
+      name: t('awsActions.cloudwatch.manageLogs.name'),
+      description: t('awsActions.cloudwatch.manageLogs.description'),
       category: "write",
       actions: ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
       selected: false,
@@ -273,34 +274,68 @@ const resourceActions: Record<string, AWSAction[]> = {
   sqs: [
     {
       id: "sqs-receive-messages",
-      name: "메시지 수신",
-      description: "SQS 큐에서 메시지를 수신하고 삭제합니다",
+      name: t('awsActions.sqs.receiveMessages.name'),
+      description: t('awsActions.sqs.receiveMessages.description'),
       category: "read",
       actions: ["sqs:ReceiveMessage", "sqs:DeleteMessage", "sqs:GetQueueAttributes"],
       selected: false,
     },
     {
       id: "sqs-send-messages",
-      name: "메시지 전송",
-      description: "SQS 큐에 메시지를 전송합니다",
+      name: t('awsActions.sqs.sendMessages.name'),
+      description: t('awsActions.sqs.sendMessages.description'),
       category: "write",
       actions: ["sqs:SendMessage", "sqs:GetQueueUrl"],
       selected: false,
     },
     {
       id: "sqs-manage-queues",
-      name: "큐 관리",
-      description: "SQS 큐를 생성, 수정, 삭제합니다",
+      name: t('awsActions.sqs.manageQueues.name'),
+      description: t('awsActions.sqs.manageQueues.description'),
       category: "admin",
       actions: ["sqs:CreateQueue", "sqs:DeleteQueue", "sqs:SetQueueAttributes"],
       selected: false,
     },
   ],
-}
+})
 
-export default function AWSPolicyGenerator() {
-  const [resources, setResources] = useState<AWSResource[]>(initialResources)
-  const [actions, setActions] = useState<Record<string, AWSAction[]>>(resourceActions)
+function AWSPolicyGeneratorContent() {
+  const { locale } = useI18n()
+  const t = useTranslation()
+  const [resources, setResources] = useState<AWSResource[]>(() => createInitialResources(t))
+  const [actions, setActions] = useState<Record<string, AWSAction[]>>(() => createResourceActions(t))
+
+  // 언어가 변경될 때 리소스와 액션 데이터 업데이트
+  useEffect(() => {
+    const newResources = createInitialResources(t)
+    const newActions = createResourceActions(t)
+    
+    // 기존 선택 상태 유지
+    setResources(prev => 
+      newResources.map(newResource => {
+        const existingResource = prev.find(r => r.id === newResource.id)
+        return {
+          ...newResource,
+          selected: existingResource?.selected || false,
+          arn: existingResource?.arn || undefined
+        }
+      })
+    )
+    
+    setActions(prev => {
+      const updatedActions: Record<string, AWSAction[]> = {}
+      Object.keys(newActions).forEach(resourceId => {
+        updatedActions[resourceId] = newActions[resourceId].map(newAction => {
+          const existingAction = prev[resourceId]?.find(a => a.id === newAction.id)
+          return {
+            ...newAction,
+            selected: existingAction?.selected || false
+          }
+        })
+      })
+      return updatedActions
+    })
+  }, [locale, t])
 
   const selectedResources = resources.filter((r) => r.selected)
   const selectedActions = Object.values(actions)
@@ -580,8 +615,13 @@ export default function AWSPolicyGenerator() {
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white border-b border-gray-200 px-6 py-4">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-2xl font-bold text-gray-900">AWS IAM Policy Generator</h1>
-          <p className="text-sm text-gray-600 mt-1">시각적으로 AWS IAM 정책을 생성하고 관리하세요.</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">{t('header.title')}</h1>
+              <p className="text-sm text-gray-600 mt-1">{t('header.subtitle')}</p>
+            </div>
+            <LanguageSelector />
+          </div>
         </div>
       </header>
 
@@ -617,5 +657,13 @@ export default function AWSPolicyGenerator() {
         </div>
       </main>
     </div>
+  )
+}
+
+export default function AWSPolicyGenerator() {
+  return (
+    <I18nProvider>
+      <AWSPolicyGeneratorContent />
+    </I18nProvider>
   )
 }
