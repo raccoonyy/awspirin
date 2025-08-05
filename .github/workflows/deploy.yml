@@ -192,11 +192,27 @@ jobs:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout gh-pages
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          ref: gh-pages
           token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Check if gh-pages branch exists
+        id: check-branch
+        run: |
+          if git ls-remote --heads origin gh-pages | grep -q gh-pages; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "✅ gh-pages branch exists"
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "❌ gh-pages branch does not exist"
+          fi
+
+      - name: Checkout gh-pages branch
+        if: steps.check-branch.outputs.exists == 'true'
+        run: |
+          git checkout gh-pages
 
       - name: Get branch name
         id: branch
@@ -206,12 +222,26 @@ jobs:
           echo "name=$clean_branch" >> $GITHUB_OUTPUT
 
       - name: Remove preview directory
+        if: steps.check-branch.outputs.exists == 'true'
         run: |
           if [ -d "preview/${{ steps.branch.outputs.name }}" ]; then
+            echo "🗑️ Removing preview directory: preview/${{ steps.branch.outputs.name }}"
             rm -rf "preview/${{ steps.branch.outputs.name }}"
             git config --local user.email "action@github.com"
             git config --local user.name "GitHub Action"
             git add .
-            git commit -m "Remove preview for ${{ github.head_ref }}" || exit 0
-            git push
+            if git commit -m "Remove preview for ${{ github.head_ref }}"; then
+              git push
+              echo "✅ Preview directory removed and changes pushed"
+            else
+              echo "ℹ️ No changes to commit"
+            fi
+          else
+            echo "ℹ️ Preview directory does not exist: preview/${{ steps.branch.outputs.name }}"
           fi
+
+      - name: Skip cleanup (no gh-pages branch)
+        if: steps.check-branch.outputs.exists == 'false'
+        run: |
+          echo "ℹ️ Skipping cleanup - gh-pages branch does not exist yet"
+          echo "This is normal for repositories that haven't had any preview deployments yet."
