@@ -10,13 +10,30 @@ jobs:
   cleanup:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout gh-pages
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          ref: gh-pages
           token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Check if gh-pages branch exists
+        id: check-branch
+        run: |
+          if git ls-remote --heads origin gh-pages | grep -q gh-pages; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "✅ gh-pages branch exists"
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "❌ gh-pages branch does not exist - no previews to cleanup"
+          fi
+
+      - name: Checkout gh-pages branch
+        if: steps.check-branch.outputs.exists == 'true'
+        run: |
+          git checkout gh-pages
 
       - name: Get all open PRs
+        if: steps.check-branch.outputs.exists == 'true'
         id: open-prs
         uses: actions/github-script@v7
         with:
@@ -32,24 +49,30 @@ jobs:
               return branchName.replace(/[^a-zA-Z0-9]/g, '-').replace(/--+/g, '-').replace(/^-|-$/g, '');
             });
             
+            console.log('Open PR branches:', openBranches);
             return openBranches;
 
       - name: Cleanup old preview directories
+        if: steps.check-branch.outputs.exists == 'true'
         run: |
           if [ -d "preview" ]; then
+            echo "📁 Found preview directory, checking for cleanup candidates..."
             cd preview
+            cleanup_count=0
+            
             for dir in */; do
               if [ -d "$dir" ]; then
                 dir_name=${dir%/}
-                echo "Checking directory: $dir_name"
+                echo "🔍 Checking directory: $dir_name"
                 
                 # Check if this directory corresponds to an open PR
                 open_branches='${{ steps.open-prs.outputs.result }}'
                 if echo "$open_branches" | grep -q "\"$dir_name\""; then
-                  echo "Keeping $dir_name (PR is still open)"
+                  echo "✅ Keeping $dir_name (PR is still open)"
                 else
-                  echo "Removing $dir_name (PR is closed or merged)"
+                  echo "🗑️ Removing $dir_name (PR is closed or merged)"
                   rm -rf "$dir"
+                  cleanup_count=$((cleanup_count + 1))
                 fi
               fi
             done
@@ -61,11 +84,18 @@ jobs:
               git config --local user.email "action@github.com"
               git config --local user.name "GitHub Action"
               git add .
-              git commit -m "Cleanup old preview directories"
+              git commit -m "Cleanup $cleanup_count old preview directories"
               git push
+              echo "✅ Cleaned up $cleanup_count preview directories"
             else
-              echo "No changes to commit"
+              echo "ℹ️ No preview directories needed cleanup"
             fi
           else
-            echo "No preview directory found"
+            echo "ℹ️ No preview directory found - nothing to cleanup"
           fi
+
+      - name: Skip cleanup (no gh-pages branch)
+        if: steps.check-branch.outputs.exists == 'false'
+        run: |
+          echo "ℹ️ Skipping cleanup - gh-pages branch does not exist yet"
+          echo "This is normal for repositories that haven't had any preview deployments yet."
