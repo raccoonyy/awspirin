@@ -43,9 +43,8 @@ export function I18nProvider({ children, initialLocale }: I18nProviderProps) {
           const { ja } = await import('./locales/ja')
           return ja
         case 'zh':
-          // 중국어 번역이 아직 없으므로 한국어로 폴백
-          console.warn('Chinese translation not available, falling back to Korean')
-          return ko
+          const { zh } = await import('./locales/zh')
+          return zh
         default:
           return ko
       }
