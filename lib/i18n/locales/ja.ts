@@ -26,7 +26,7 @@ export const ja: Translations = {
 
   header: {
     title: 'AWS IAM ポリシージェネレーター',
-    subtitle: 'AWS IAM ポリシーを視覚的に作成・管理できます。'
+    subtitle: '依存関係まで自動で入力するIAMポリシー生成器'
   },
 
   resources: {

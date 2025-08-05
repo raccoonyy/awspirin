@@ -26,7 +26,7 @@ export const ko: Translations = {
 
   header: {
     title: 'AWS IAM Policy Generator',
-    subtitle: '시각적으로 AWS IAM 정책을 생성하고 관리하세요.'
+    subtitle: '의존성까지 자동으로 입력해주는 IAM 정책 생성기'
   },
 
   resources: {

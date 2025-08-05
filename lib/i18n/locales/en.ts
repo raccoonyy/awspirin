@@ -26,7 +26,7 @@ export const en: Translations = {
 
   header: {
     title: 'AWS IAM Policy Generator',
-    subtitle: 'Visually create and manage AWS IAM policies.'
+    subtitle: 'IAM policy generator that automatically includes dependencies'
   },
 
   resources: {

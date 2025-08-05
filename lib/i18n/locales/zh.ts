@@ -26,7 +26,7 @@ export const zh: Translations = {
 
   header: {
     title: 'AWS IAM 策略生成器',
-    subtitle: '可视化创建和管理 AWS IAM 策略。'
+    subtitle: '自动包含依赖关系的IAM策略生成器'
   },
 
   resources: {
