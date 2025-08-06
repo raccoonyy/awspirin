@@ -173,7 +173,7 @@ export function PolicyPreview({ selectedResources, selectedActions, getAllAwsAct
             </div>
 
             <div className="relative">
-              <pre className="bg-gray-900 text-gray-100 p-4 rounded-lg text-sm overflow-x-auto max-h-96 overflow-y-auto">
+              <pre className="bg-white border border-gray-200 text-gray-800 p-4 rounded-lg text-sm overflow-x-auto">
                 <code>{policy}</code>
               </pre>
             </div>
