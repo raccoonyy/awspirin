@@ -72,16 +72,16 @@ export const ja: Translations = {
     selectResource: 'まずリソースを選択してください。',
     arnLabel: 'ARN（オプション）',
     arnPlaceholder: {
-      s3: 'arn:aws:s3:::my-bucket',
-      dynamodb: 'arn:aws:dynamodb:region:account:table/table-name',
-      cloudwatch: 'arn:aws:logs:region:account:log-group:log-group-name',
-      default: 'arn:aws:{service}:region:account:resource'
-    },
-    arnHelp: {
       s3: 'S3バケットARNを入力すると、バケットとオブジェクト（/*）の両方に権限が適用されます',
       dynamodb: 'DynamoDBテーブルARNを入力すると、テーブルとインデックス（/*）の両方に権限が適用されます',
       cloudwatch: 'CloudWatchロググループARNを入力すると、ロググループとストリーム（:*）の両方に権限が適用されます',
       default: '空白にするとすべてのリソース（*）に適用されます'
+    },
+    arnHelp: {
+      s3: 'arn:aws:s3:::my-bucket',
+      dynamodb: 'arn:aws:dynamodb:region:account:table/table-name',
+      cloudwatch: 'arn:aws:logs:region:account:log-group:log-group-name',
+      default: 'arn:aws:{service}:region:account:resource'
     },
     categories: {
       read: '読み取り権限',

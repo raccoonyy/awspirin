@@ -72,16 +72,16 @@ export const ko: Translations = {
     selectResource: '리소스를 먼저 선택하세요.',
     arnLabel: 'ARN (선택사항)',
     arnPlaceholder: {
-      s3: 'arn:aws:s3:::my-bucket',
-      dynamodb: 'arn:aws:dynamodb:region:account:table/table-name',
-      cloudwatch: 'arn:aws:logs:region:account:log-group:log-group-name',
-      default: 'arn:aws:{service}:region:account:resource'
-    },
-    arnHelp: {
       s3: 'S3 버킷 ARN을 입력하면 버킷과 객체(/*) 모두에 대한 권한이 적용됩니다',
       dynamodb: 'DynamoDB 테이블 ARN을 입력하면 테이블과 인덱스(/*) 모두에 대한 권한이 적용됩니다',
       cloudwatch: 'CloudWatch 로그 그룹 ARN을 입력하면 로그 그룹과 스트림(:*) 모두에 대한 권한이 적용됩니다',
       default: '비워두면 모든 리소스(*)에 적용됩니다'
+    },
+    arnHelp: {
+      s3: 'arn:aws:s3:::my-bucket',
+      dynamodb: 'arn:aws:dynamodb:region:account:table/table-name',
+      cloudwatch: 'arn:aws:logs:region:account:log-group:log-group-name',
+      default: 'arn:aws:{service}:region:account:resource'
     },
     categories: {
       read: '읽기 권한',

@@ -72,16 +72,16 @@ export const en: Translations = {
     selectResource: 'Please select a resource first.',
     arnLabel: 'ARN (Optional)',
     arnPlaceholder: {
-      s3: 'arn:aws:s3:::my-bucket',
-      dynamodb: 'arn:aws:dynamodb:region:account:table/table-name',
-      cloudwatch: 'arn:aws:logs:region:account:log-group:log-group-name',
-      default: 'arn:aws:{service}:region:account:resource'
-    },
-    arnHelp: {
       s3: 'S3 bucket ARN applies permissions to both bucket and objects (/*)',
       dynamodb: 'DynamoDB table ARN applies permissions to both table and indexes (/*)',
       cloudwatch: 'CloudWatch log group ARN applies permissions to both log group and streams (:*)',
       default: 'Leave empty to apply to all resources (*)'
+    },
+    arnHelp: {
+      s3: 'arn:aws:s3:::my-bucket',
+      dynamodb: 'arn:aws:dynamodb:region:account:table/table-name',
+      cloudwatch: 'arn:aws:logs:region:account:log-group:log-group-name',
+      default: 'arn:aws:{service}:region:account:resource'
     },
     categories: {
       read: 'Read Permissions',
