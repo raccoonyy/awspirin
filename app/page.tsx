@@ -625,7 +625,7 @@ function AWSPolicyGeneratorContent() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto p-6">
+      <main className="max-w-7xl mx-auto py-6">
         <div className="grid grid-cols-10 gap-6 min-h-[800px]">
           {/* 리소스 선택 패널 (30%) */}
           <div className="col-span-3">

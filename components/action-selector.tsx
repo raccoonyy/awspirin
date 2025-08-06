@@ -1,13 +1,12 @@
 "use client"
 
-import { useState } from "react"
-import { ChevronDown, ChevronRight, AlertTriangle } from "lucide-react"
+import { useState, useEffect, useRef } from "react"
+import { AlertTriangle } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Input } from "@/components/ui/input"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { useTranslation } from "@/lib/i18n"
 import type { AWSResource, AWSAction } from "@/app/page"
 
@@ -29,10 +28,41 @@ export function ActionSelector({
   onResourceArnChange,
 }: ActionSelectorProps) {
   const t = useTranslation()
+  const [isHighlighted, setIsHighlighted] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const prevSelectedResourcesCountRef = useRef<number>(0)
 
   const totalSelectedActions = Object.values(actions)
     .flat()
     .filter((a) => a.selected).length
+
+  // 리소스 개수 변경 시에만 하이라이팅 (새 리소스 선택 시)
+  useEffect(() => {
+    const currentResourceCount = selectedResources.length
+    
+    // 리소스가 추가되었을 때만 하이라이팅 (첫 렌더링 제외)
+    if (currentResourceCount > prevSelectedResourcesCountRef.current && prevSelectedResourcesCountRef.current > 0) {
+      setIsHighlighted(true)
+      
+      // 컨테이너로 스크롤 (부드럽게)
+      if (containerRef.current) {
+        containerRef.current.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'nearest' 
+        })
+      }
+
+      // 1.5초 후 하이라이팅 제거
+      const timer = setTimeout(() => {
+        setIsHighlighted(false)
+      }, 1500)
+
+      return () => clearTimeout(timer)
+    }
+
+    // 이전 리소스 개수 업데이트
+    prevSelectedResourcesCountRef.current = currentResourceCount
+  }, [selectedResources.length])
 
 
 
@@ -101,10 +131,21 @@ export function ActionSelector({
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 h-full">
+    <div 
+      ref={containerRef}
+      className={`bg-white rounded-lg shadow-sm border border-gray-200 h-full transition-all duration-200 ease-in-out ${
+        isHighlighted 
+          ? 'ring-2 ring-yellow-300 ring-opacity-90 shadow-lg border-yellow-200 bg-yellow-100/40' 
+          : ''
+      }`}
+    >
         <div className="p-6 border-b border-gray-200">
           <div className="flex items-center justify-between mb-2">
-            <h2 className="text-xl font-semibold text-gray-900">{t('actions.title')}</h2>
+            <h2 className={`text-xl font-semibold text-gray-900 transition-colors duration-200 ease-in-out ${
+              isHighlighted ? 'text-yellow-600' : ''
+            }`}>
+              {t('actions.title')}
+            </h2>
             {totalSelectedActions > 0 && (
               <Badge variant="secondary" className="bg-purple-100 text-purple-800">
                 {t('actions.selectedCount', { count: totalSelectedActions })}
