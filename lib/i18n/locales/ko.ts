@@ -97,6 +97,7 @@ export const ko: Translations = {
     valid: '유효한 정책',
     selectActions: '액션을 선택해주세요.',
     noActionsSelected: '작업을 선택하면 정책이 생성됩니다',
+    copyTooltip: '클립보드에 복사하기',
     summary: {
       totalActions: '총 {count}개의 작업이 선택되었습니다',
       awsActions: '실제 AWS 액션 {count}개가 포함되었습니다',

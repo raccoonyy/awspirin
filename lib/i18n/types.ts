@@ -104,6 +104,7 @@ export interface Translations {
     valid: string
     selectActions: string
     noActionsSelected: string
+    copyTooltip: string
     summary: {
       totalActions: string // "총 {count}개의 작업이 선택되었습니다"
       awsActions: string // "실제 AWS 액션 {count}개가 포함되었습니다"

@@ -5,6 +5,12 @@ import { Copy, Check, AlertCircle, CheckCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { useTranslation } from "@/lib/i18n"
 import type { AWSResource, AWSAction } from "@/app/page"
 
@@ -124,7 +130,7 @@ export function PolicyPreview({ selectedResources, selectedActions, getAllAwsAct
       // GA4 이벤트 전송
       if (typeof window !== 'undefined' && window.gtag) {
         const statements = getPolicyStatements()
-        window.gtag('event', 'policy_copy', {
+        window.gtag('event', 'copied', {
           policy_statements_count: statements.length,
           selected_resources_count: selectedResources.length,
           selected_actions_count: selectedActions.length,
@@ -138,8 +144,8 @@ export function PolicyPreview({ selectedResources, selectedActions, getAllAwsAct
     <Card
       ref={cardRef}
       className={`border-gray-200 transition-all duration-200 ease-in-out ${isHighlighted
-          ? 'ring-2 ring-yellow-300 ring-opacity-90 shadow-lg border-yellow-200 bg-yellow-100/50'
-          : ''
+        ? 'ring-2 ring-yellow-300 ring-opacity-90 shadow-lg border-yellow-200 bg-yellow-100/50'
+        : ''
         }`}
     >
       <CardHeader className="pb-4">
@@ -148,9 +154,18 @@ export function PolicyPreview({ selectedResources, selectedActions, getAllAwsAct
             }`}>
             {t('policy.title')}
           </CardTitle>
-          <Button variant="outline" size="sm" onClick={handleCopy} disabled={!policy} className="h-8 bg-transparent">
-            {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-          </Button>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="outline" size="sm" onClick={handleCopy} disabled={!policy} className="h-8 bg-transparent">
+                  {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{t('policy.copyTooltip')}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
       </CardHeader>
 
@@ -193,13 +208,13 @@ export function PolicyPreview({ selectedResources, selectedActions, getAllAwsAct
                   return t('policy.summary.resources.none')
                 })()
               }</p>
-              
+
               {/* 입력된 ARN 목록 표시 */}
               {(() => {
-                const resourcesWithArn = selectedResources.filter(resource => 
+                const resourcesWithArn = selectedResources.filter(resource =>
                   resource.arn && resource.arn.trim() !== ''
                 )
-                
+
                 if (resourcesWithArn.length > 0) {
                   return (
                     <div className="mt-3 pt-3 border-t border-gray-200">

@@ -97,6 +97,7 @@ export const zh: Translations = {
     valid: '有效策略',
     selectActions: '请选择操作。',
     noActionsSelected: '选择操作后将生成策略',
+    copyTooltip: '复制到剪贴板',
     summary: {
       totalActions: '总共选择了 {count} 个操作',
       awsActions: '包含 {count} 个 AWS 操作',

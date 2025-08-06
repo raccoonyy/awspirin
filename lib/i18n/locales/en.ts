@@ -97,6 +97,7 @@ export const en: Translations = {
     valid: 'Valid Policy',
     selectActions: 'Please select actions.',
     noActionsSelected: 'Select actions to generate policy',
+    copyTooltip: 'Copy to clipboard',
     summary: {
       totalActions: 'Total {count} actions selected',
       awsActions: '{count} AWS actions included',

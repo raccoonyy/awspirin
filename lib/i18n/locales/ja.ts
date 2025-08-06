@@ -97,6 +97,7 @@ export const ja: Translations = {
     valid: '有効なポリシー',
     selectActions: 'アクションを選択してください。',
     noActionsSelected: 'アクションを選択するとポリシーが生成されます',
+    copyTooltip: 'クリップボードにコピー',
     summary: {
       totalActions: '合計{count}個のアクションが選択されました',
       awsActions: '{count}個のAWSアクションが含まれています',
