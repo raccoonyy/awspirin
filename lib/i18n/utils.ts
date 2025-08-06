@@ -14,6 +14,39 @@ export const LOCALE_NAMES: Record<Locale, string> = {
   zh: '中文'
 }
 
+// URL 파라미터에서 언어 감지
+export function getLocaleFromUrl(): Locale | null {
+  if (typeof window === 'undefined') return null
+  
+  try {
+    const urlParams = new URLSearchParams(window.location.search)
+    const langParam = urlParams.get('lang')
+    
+    if (langParam && SUPPORTED_LOCALES.includes(langParam as Locale)) {
+      return langParam as Locale
+    }
+  } catch (error) {
+    console.warn('Failed to get locale from URL:', error)
+  }
+  
+  return null
+}
+
+// URL 파라미터 업데이트
+export function updateUrlLocale(locale: Locale): void {
+  if (typeof window === 'undefined') return
+  
+  try {
+    const url = new URL(window.location.href)
+    url.searchParams.set('lang', locale)
+    
+    // URL을 업데이트하되 페이지 새로고침은 하지 않음
+    window.history.replaceState({}, '', url.toString())
+  } catch (error) {
+    console.warn('Failed to update URL locale:', error)
+  }
+}
+
 // 브라우저 언어 감지
 export function detectBrowserLocale(): Locale {
   if (typeof window === 'undefined') return DEFAULT_LOCALE

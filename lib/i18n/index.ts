@@ -5,6 +5,8 @@ export {
   DEFAULT_LOCALE, 
   SUPPORTED_LOCALES, 
   LOCALE_NAMES,
+  getLocaleFromUrl,
+  updateUrlLocale,
   detectBrowserLocale,
   getStoredLocale,
   setStoredLocale,

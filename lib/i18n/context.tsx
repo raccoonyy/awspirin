@@ -5,6 +5,8 @@ import type { Locale, Translations, TranslationFunction } from './types'
 import { ko } from './locales/ko'
 import { 
   DEFAULT_LOCALE, 
+  getLocaleFromUrl,
+  updateUrlLocale,
   detectBrowserLocale, 
   getStoredLocale, 
   setStoredLocale,
@@ -64,6 +66,7 @@ export function I18nProvider({ children, initialLocale }: I18nProviderProps) {
       setTranslations(newTranslations)
       setLocaleState(newLocale)
       setStoredLocale(newLocale)
+      updateUrlLocale(newLocale) // URL 파라미터도 업데이트
     } catch (error) {
       console.error('Failed to change locale:', error)
     } finally {
@@ -77,13 +80,19 @@ export function I18nProvider({ children, initialLocale }: I18nProviderProps) {
       let targetLocale: Locale = initialLocale || DEFAULT_LOCALE
       
       if (!initialLocale) {
-        // 저장된 언어 설정 확인
-        const storedLocale = getStoredLocale()
-        if (storedLocale) {
-          targetLocale = storedLocale
+        // 1. URL 파라미터 확인 (최우선)
+        const urlLocale = getLocaleFromUrl()
+        if (urlLocale) {
+          targetLocale = urlLocale
         } else {
-          // 저장된 설정이 없으면 브라우저 언어 감지
-          targetLocale = detectBrowserLocale()
+          // 2. 저장된 언어 설정 확인
+          const storedLocale = getStoredLocale()
+          if (storedLocale) {
+            targetLocale = storedLocale
+          } else {
+            // 3. 저장된 설정이 없으면 브라우저 언어 감지
+            targetLocale = detectBrowserLocale()
+          }
         }
       }
       
@@ -96,6 +105,23 @@ export function I18nProvider({ children, initialLocale }: I18nProviderProps) {
     
     initializeLocale()
   }, [initialLocale])
+
+  // URL 파라미터 변경 감지
+  useEffect(() => {
+    const handleUrlChange = () => {
+      const urlLocale = getLocaleFromUrl()
+      if (urlLocale && urlLocale !== locale) {
+        setLocale(urlLocale)
+      }
+    }
+
+    // popstate 이벤트 리스너 추가 (뒤로가기/앞으로가기 감지)
+    window.addEventListener('popstate', handleUrlChange)
+    
+    return () => {
+      window.removeEventListener('popstate', handleUrlChange)
+    }
+  }, [locale])
 
   // 번역 함수 생성
   const t = createTranslationFunction(translations)
