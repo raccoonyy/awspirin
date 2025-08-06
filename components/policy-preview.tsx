@@ -121,11 +121,10 @@ export function PolicyPreview({ selectedResources, selectedActions, getAllAwsAct
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
 
-      // GTM 이벤트 전송
-      if (typeof window !== 'undefined' && window.dataLayer) {
+      // GA4 이벤트 전송
+      if (typeof window !== 'undefined' && window.gtag) {
         const statements = getPolicyStatements()
-        window.dataLayer.push({
-          event: 'policy_copy',
+        window.gtag('event', 'policy_copy', {
           policy_statements_count: statements.length,
           selected_resources_count: selectedResources.length,
           selected_actions_count: selectedActions.length,

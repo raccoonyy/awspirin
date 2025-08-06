@@ -30,7 +30,7 @@ npm install
 
 # 환경 변수 설정 (선택사항)
 cp .env.local.example .env.local
-# .env.local 파일에서 GTM_ID 설정
+# .env.local 파일에서 GA4_ID 설정
 
 # 개발 서버 실행
 npm run dev
@@ -44,14 +44,14 @@ npm run build
 
 ## 📊 분석 설정
 
-### Google Tag Manager 설정
+### Google Analytics 4 설정
 
-1. **GTM 계정 생성**: [Google Tag Manager](https://tagmanager.google.com/)에서 계정 생성
-2. **컨테이너 생성**: 웹사이트용 컨테이너 생성 후 GTM ID 확인 (GTM-XXXXXXX)
+1. **GA4 계정 생성**: [Google Analytics](https://analytics.google.com/)에서 계정 생성
+2. **측정 ID 확인**: 데이터 스트림 생성 후 측정 ID 확인 (G-XXXXXXXXXX)
 3. **GitHub Secrets 설정**:
    - Repository Settings → Secrets and variables → Actions
-   - `GTM_ID` secret 추가 (예: GTM-XXXXXXX)
-4. **로컬 개발**: `.env.local` 파일에 `NEXT_PUBLIC_GTM_ID=GTM-XXXXXXX` 추가
+   - `GA4_ID` secret 추가 (예: G-XXXXXXXXXX)
+4. **로컬 개발**: `.env.local` 파일에 `NEXT_PUBLIC_GA4_ID=G-XXXXXXXXXX` 추가
 
 ### 추적되는 이벤트
 
@@ -60,9 +60,11 @@ npm run build
 - **arn_input**: ARN 입력
 - **policy_copy**: 정책 복사
 
-### GTM에서 설정할 수 있는 태그 예시
+### GA4에서 확인할 수 있는 데이터
 
-- Google Analytics 4
+- 실시간 방문자 수
+- 사용자 행동 패턴
+- 이벤트 발생 통계
 - Facebook Pixel
 - 기타 마케팅/분석 도구
 

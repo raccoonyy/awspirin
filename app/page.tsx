@@ -5,6 +5,7 @@ import { ResourceSelector } from "@/components/resource-selector"
 import { ActionSelector } from "@/components/action-selector"
 import { PolicyPreview } from "@/components/policy-preview"
 import { LanguageSelector } from "@/components/language-selector"
+import { Analytics } from "@/components/analytics"
 import { I18nProvider, useI18n, useTranslation } from "@/lib/i18n"
 
 export interface AWSResource {
@@ -542,10 +543,9 @@ function AWSPolicyGeneratorContent() {
     
     setResources((prev) => prev.map((r) => (r.id === resourceId ? { ...r, selected: !r.selected } : r)))
 
-    // GTM 이벤트 전송
-    if (typeof window !== 'undefined' && window.dataLayer) {
-      window.dataLayer.push({
-        event: 'resource_toggle',
+    // GA4 이벤트 전송
+    if (typeof window !== 'undefined' && window.gtag) {
+      window.gtag('event', 'resource_toggle', {
         resource_id: resourceId,
         resource_name: resource?.name,
         action: isCurrentlySelected ? 'deselect' : 'select'
@@ -570,10 +570,9 @@ function AWSPolicyGeneratorContent() {
       [resourceId]: prev[resourceId]?.map((a) => (a.id === actionId ? { ...a, selected: !a.selected } : a)) || [],
     }))
 
-    // GTM 이벤트 전송
-    if (typeof window !== 'undefined' && window.dataLayer) {
-      window.dataLayer.push({
-        event: 'action_toggle',
+    // GA4 이벤트 전송
+    if (typeof window !== 'undefined' && window.gtag) {
+      window.gtag('event', 'action_toggle', {
         resource_id: resourceId,
         action_id: actionId,
         action_name: action?.name,
@@ -601,9 +600,8 @@ function AWSPolicyGeneratorContent() {
     setResources((prev) => prev.map((r) => (r.id === resourceId ? { ...r, arn } : r)))
 
     // ARN 입력 이벤트 전송 (빈 값이 아닐 때만)
-    if (arn.trim() && typeof window !== 'undefined' && window.dataLayer) {
-      window.dataLayer.push({
-        event: 'arn_input',
+    if (arn.trim() && typeof window !== 'undefined' && window.gtag) {
+      window.gtag('event', 'arn_input', {
         resource_id: resourceId,
         arn_length: arn.length,
         has_valid_arn: isValidArn(arn)
@@ -683,6 +681,7 @@ function AWSPolicyGeneratorContent() {
 export default function AWSPolicyGenerator() {
   return (
     <I18nProvider>
+      <Analytics />
       <AWSPolicyGeneratorContent />
     </I18nProvider>
   )
