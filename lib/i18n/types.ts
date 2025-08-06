@@ -31,6 +31,7 @@ export interface Translations {
   header: {
     title: string
     subtitle: string
+    githubIssue: string
   }
 
   // 리소스 선택 섹션

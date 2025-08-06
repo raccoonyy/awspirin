@@ -26,7 +26,8 @@ export const zh: Translations = {
 
   header: {
     title: 'AWS IAM 策略生成器',
-    subtitle: '自动包含依赖关系的IAM策略生成器'
+    subtitle: '自动包含依赖关系的IAM策略生成器',
+    githubIssue: '如需报告错误或提出功能建议，请使用[GitHub Issues](https://github.com/raccoonyy/awspirin/issues/new)'
   },
 
   resources: {
