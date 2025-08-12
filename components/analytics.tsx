@@ -3,10 +3,20 @@
 import Script from 'next/script'
 
 export function Analytics() {
-  const GA4_ID = process.env.NEXT_PUBLIC_GA4_ID
-  const ENABLE_ANALYTICS = process.env.NEXT_PUBLIC_ENABLE_ANALYTICS === 'true'
+  // 환경변수에서 GA4_ID를 가져오되, 없으면 하드코딩된 값 사용 (임시)
+  const GA4_ID = process.env.NEXT_PUBLIC_GA4_ID || 'G-L0TPTZ8WCY'
+  const ENABLE_ANALYTICS = process.env.NEXT_PUBLIC_ENABLE_ANALYTICS !== 'false'
 
-  if (!GA4_ID || !ENABLE_ANALYTICS) {
+  // 디버깅을 위한 콘솔 로그 (프로덕션에서는 제거 예정)
+  console.log('Analytics Debug:', { 
+    GA4_ID, 
+    ENABLE_ANALYTICS,
+    env_GA4_ID: process.env.NEXT_PUBLIC_GA4_ID,
+    env_ENABLE: process.env.NEXT_PUBLIC_ENABLE_ANALYTICS
+  })
+
+  if (!GA4_ID) {
+    console.warn('Analytics not loaded: No GA4_ID')
     return null
   }
 
