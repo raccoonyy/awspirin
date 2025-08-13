@@ -623,6 +623,14 @@ function AWSPolicyGeneratorContent() {
         </div>
       </header>
 
+      {/* 히어로 섹션 */}
+      <section className="py-12" style={{ background: 'linear-gradient(to right, #FFF4E6, #FFEDD5)' }}>
+        <div className="max-w-7xl mx-auto px-6 text-center">
+          <h2 className="text-4xl font-bold text-gray-900 mb-4">{t('hero.mainTitle')}</h2>
+          <p className="text-xl text-gray-600">{t('hero.subTitle')}</p>
+        </div>
+      </section>
+
       <main className="max-w-7xl mx-auto py-6">
         <div className="grid grid-cols-10 gap-6 min-h-[800px]">
           {/* 리소스 선택 패널 (30%) */}

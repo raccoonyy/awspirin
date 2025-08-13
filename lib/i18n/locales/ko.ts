@@ -25,9 +25,14 @@ export const ko: Translations = {
   },
 
   header: {
-    title: 'AWS IAM Policy Generator',
+    title: 'AWSpirin',
     subtitle: '의존성까지 자동으로 입력해주는 IAM 정책 생성기',
     githubIssue: '버그 신고나 기능 제안은 [깃헙 이슈](https://github.com/raccoonyy/awspirin/issues/new)를 사용해주세요'
+  },
+
+  hero: {
+    mainTitle: '클릭만으로 편하게',
+    subTitle: '(두통 없이) AWS IAM 정책을 생성하세요.'
   },
 
   footer: {

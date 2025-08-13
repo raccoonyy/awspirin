@@ -34,6 +34,12 @@ export interface Translations {
     githubIssue: string
   }
 
+  // 히어로 섹션
+  hero: {
+    mainTitle: string
+    subTitle: string
+  }
+
   // 푸터
   footer: {
     githubIssue: string

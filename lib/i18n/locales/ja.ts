@@ -25,9 +25,14 @@ export const ja: Translations = {
   },
 
   header: {
-    title: 'AWS IAM ポリシージェネレーター',
+    title: 'AWSpirin',
     subtitle: '依存関係まで自動で入力するIAMポリシー生成器',
     githubIssue: 'バグ報告や機能提案は[GitHubイシュー](https://github.com/raccoonyy/awspirin/issues/new)をご利用ください'
+  },
+
+  hero: {
+    mainTitle: 'クリックだけで簡単に',
+    subTitle: '（頭痛なしで）AWS IAMポリシーを生成しましょう。'
   },
 
   footer: {

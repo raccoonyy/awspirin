@@ -25,9 +25,14 @@ export const en: Translations = {
   },
 
   header: {
-    title: 'AWS IAM Policy Generator',
+    title: 'AWSpirin',
     subtitle: 'IAM policy generator that automatically includes dependencies',
     githubIssue: 'For bug reports or feature requests, please use [GitHub Issues](https://github.com/raccoonyy/awspirin/issues/new)'
+  },
+
+  hero: {
+    mainTitle: 'WITHOUT HEADACHES',
+    subTitle: 'Easy generate AWS IAM policies with just clicks'
   },
 
   footer: {
