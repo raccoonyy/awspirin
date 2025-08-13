@@ -310,9 +310,9 @@ function AWSPolicyGeneratorContent() {
   useEffect(() => {
     const newResources = createInitialResources(t)
     const newActions = createResourceActions(t)
-    
+
     // 기존 선택 상태 유지
-    setResources(prev => 
+    setResources(prev =>
       newResources.map(newResource => {
         const existingResource = prev.find(r => r.id === newResource.id)
         return {
@@ -322,7 +322,7 @@ function AWSPolicyGeneratorContent() {
         }
       })
     )
-    
+
     setActions(prev => {
       const updatedActions: Record<string, AWSAction[]> = {}
       Object.keys(newActions).forEach(resourceId => {
@@ -342,28 +342,29 @@ function AWSPolicyGeneratorContent() {
   const selectedActions = Object.values(actions)
     .flat()
     .filter((a) => a.selected)
-  
+
   // 선택된 작업들로부터 실제 AWS 액션 코드들을 추출
   const getAllAwsActions = () => {
     const awsActions = new Set<string>()
-    
+
     selectedActions.forEach(action => {
       // 메인 액션들 추가
       action.actions.forEach(awsAction => awsActions.add(awsAction))
-      
+
       // 의존성 액션들 추가
       if (action.dependencies) {
         action.dependencies.forEach(dep => awsActions.add(dep))
       }
     })
-    
+
     return Array.from(awsActions).sort()
   }
 
   // ARN 유효성 검사
+  // 기본 ARN 형식: arn:partition:service:region:account-id:resource-id
   const isValidArn = (arn: string) => {
     if (!arn.trim()) return false
-    // 기본 ARN 형식: arn:partition:service:region:account-id:resource
+    // 기본 ARN 형식: arn:partition:service:region:account-id:resource-id
     const arnPattern = /^arn:[^:]+:[^:]+:[^:]*:[^:]*:.+$/
     return arnPattern.test(arn.trim())
   }
@@ -371,7 +372,7 @@ function AWSPolicyGeneratorContent() {
   // 서비스별 ARN 처리 함수
   const processServiceArn = (serviceId: string, arn: string) => {
     const arns: string[] = []
-    
+
     switch (serviceId) {
       case 's3':
         return processS3Arn(arn)
@@ -379,6 +380,14 @@ function AWSPolicyGeneratorContent() {
         return processDynamoDBArn(arn)
       case 'cloudwatch':
         return processCloudWatchArn(arn)
+      case 'ec2':
+        return processEC2Arn(arn)
+      case 'lambda':
+        return processLambdaArn(arn)
+      case 'sns':
+        return processSNSArn(arn)
+      case 'sqs':
+        return processSQSArn(arn)
       default:
         arns.push(arn)
         return arns
@@ -386,11 +395,12 @@ function AWSPolicyGeneratorContent() {
   }
 
   // S3 ARN을 처리하는 함수
+  // S3 ARN 형식: arn:aws:s3:::bucket-name 또는 arn:aws:s3:::bucket-name/object-key
   const processS3Arn = (arn: string) => {
     const arns: string[] = []
-    
+
     // S3 ARN 형식 확인 및 수정
-    // 잘못된 형식: arn:aws:s3:region:account:bucket-name
+    // 잘못된 형식: arn:aws:s3:region:account-id:bucket-name
     // 올바른 형식: arn:aws:s3:::bucket-name
     let correctedArn = arn
     if (arn.match(/^arn:aws:s3:[^:]*:[^:]*:[^/]+$/)) {
@@ -400,7 +410,7 @@ function AWSPolicyGeneratorContent() {
         correctedArn = `arn:aws:s3:::${parts[5]}`
       }
     }
-    
+
     // 버킷 ARN인지 확인 (arn:aws:s3:::bucket-name 형태)
     if (correctedArn.match(/^arn:aws:s3:::[^/]+$/)) {
       // 버킷 ARN이면 버킷과 객체 ARN 모두 추가
@@ -416,15 +426,16 @@ function AWSPolicyGeneratorContent() {
       // 다른 형태면 그대로 사용
       arns.push(correctedArn)
     }
-    
+
     return arns
   }
 
   // DynamoDB ARN을 처리하는 함수
+  // DynamoDB ARN 형식: arn:aws:dynamodb:region:account-id:table/table-name
   const processDynamoDBArn = (arn: string) => {
     const arns: string[] = []
-    
-    // 테이블 ARN인지 확인 (arn:aws:dynamodb:region:account:table/table-name)
+
+    // 테이블 ARN인지 확인 (arn:aws:dynamodb:region:account-id:table/table-name)
     if (arn.match(/^arn:aws:dynamodb:[^:]+:[^:]+:table\/[^/]+$/)) {
       // 테이블 ARN이면 테이블과 인덱스 ARN 모두 추가
       arns.push(arn) // 테이블 자체
@@ -433,15 +444,16 @@ function AWSPolicyGeneratorContent() {
       // 다른 형태면 그대로 사용
       arns.push(arn)
     }
-    
+
     return arns
   }
 
   // CloudWatch ARN을 처리하는 함수
+  // CloudWatch Logs ARN 형식: arn:aws:logs:region:account-id:log-group:log-group-name
   const processCloudWatchArn = (arn: string) => {
     const arns: string[] = []
-    
-    // 로그 그룹 ARN인지 확인 (arn:aws:logs:region:account:log-group:log-group-name)
+
+    // 로그 그룹 ARN인지 확인 (arn:aws:logs:region:account-id:log-group:log-group-name)
     if (arn.match(/^arn:aws:logs:[^:]+:[^:]+:log-group:[^:]+$/)) {
       // 로그 그룹 ARN이면 로그 그룹과 스트림 ARN 모두 추가
       arns.push(arn) // 로그 그룹 자체
@@ -450,7 +462,59 @@ function AWSPolicyGeneratorContent() {
       // 다른 형태면 그대로 사용
       arns.push(arn)
     }
-    
+
+    return arns
+  }
+
+  // EC2 ARN을 처리하는 함수
+  // EC2 ARN 형식: arn:aws:ec2:region:account-id:instance/instance-id
+  const processEC2Arn = (arn: string) => {
+    const arns: string[] = []
+
+    // EC2는 대부분 단일 리소스이므로 그대로 사용
+    // 예외: 보안 그룹, VPC 등은 별도 처리 가능하지만 현재는 단순하게 처리
+    arns.push(arn)
+
+    return arns
+  }
+
+  // Lambda ARN을 처리하는 함수
+  // Lambda ARN 형식: arn:aws:lambda:region:account-id:function:function-name
+  const processLambdaArn = (arn: string) => {
+    const arns: string[] = []
+
+    // Lambda 함수 ARN인지 확인
+    if (arn.match(/^arn:aws:lambda:[^:]+:[^:]+:function:[^:]+$/)) {
+      // 함수 ARN이면 함수와 버전/별칭 모두 포함
+      arns.push(arn) // 함수 자체
+      arns.push(`${arn}:*`) // 모든 버전과 별칭
+    } else {
+      // 다른 형태면 그대로 사용
+      arns.push(arn)
+    }
+
+    return arns
+  }
+
+  // SNS ARN을 처리하는 함수
+  // SNS ARN 형식: arn:aws:sns:region:account-id:topic-name
+  const processSNSArn = (arn: string) => {
+    const arns: string[] = []
+
+    // SNS 토픽은 단일 리소스이므로 그대로 사용
+    arns.push(arn)
+
+    return arns
+  }
+
+  // SQS ARN을 처리하는 함수
+  // SQS ARN 형식: arn:aws:sqs:region:account-id:queue-name
+  const processSQSArn = (arn: string) => {
+    const arns: string[] = []
+
+    // SQS 큐는 단일 리소스이므로 그대로 사용
+    arns.push(arn)
+
     return arns
   }
 
@@ -463,7 +527,7 @@ function AWSPolicyGeneratorContent() {
     const statements: any[] = []
     const resourcesWithArn: AWSResource[] = []
     const resourcesWithoutArn: AWSResource[] = []
-    
+
     // ARN이 있는 리소스와 없는 리소스 분리
     selectedResources.forEach(resource => {
       if (resource.arn && isValidArn(resource.arn)) {
@@ -472,14 +536,14 @@ function AWSPolicyGeneratorContent() {
         resourcesWithoutArn.push(resource)
       }
     })
-    
+
     // ARN이 있는 리소스들에 대해 각각 별도 Statement 생성
     resourcesWithArn.forEach(resource => {
       const resourceActions = selectedActions.filter(action => {
         // 해당 리소스의 액션만 필터링
         return actions[resource.id]?.some(a => a.id === action.id && a.selected)
       })
-      
+
       if (resourceActions.length > 0) {
         const resourceAwsActions = new Set<string>()
         resourceActions.forEach(action => {
@@ -488,10 +552,10 @@ function AWSPolicyGeneratorContent() {
             action.dependencies.forEach(dep => resourceAwsActions.add(dep))
           }
         })
-        
+
         const trimmedArn = resource.arn!.trim()
         const processedArns = processServiceArn(resource.id, trimmedArn)
-        
+
         statements.push({
           Effect: "Allow",
           Action: Array.from(resourceAwsActions).sort(),
@@ -499,16 +563,16 @@ function AWSPolicyGeneratorContent() {
         })
       }
     })
-    
+
     // ARN이 없는 리소스들에 대해 하나의 Statement 생성
     if (resourcesWithoutArn.length > 0) {
       const wildcardActions = selectedActions.filter(action => {
         // ARN이 없는 리소스들의 액션만 필터링
-        return resourcesWithoutArn.some(resource => 
+        return resourcesWithoutArn.some(resource =>
           actions[resource.id]?.some(a => a.id === action.id && a.selected)
         )
       })
-      
+
       if (wildcardActions.length > 0) {
         const wildcardAwsActions = new Set<string>()
         wildcardActions.forEach(action => {
@@ -517,7 +581,7 @@ function AWSPolicyGeneratorContent() {
             action.dependencies.forEach(dep => wildcardAwsActions.add(dep))
           }
         })
-        
+
         statements.push({
           Effect: "Allow",
           Action: Array.from(wildcardAwsActions).sort(),
@@ -525,7 +589,7 @@ function AWSPolicyGeneratorContent() {
         })
       }
     }
-    
+
     return statements
   }
 
@@ -540,7 +604,7 @@ function AWSPolicyGeneratorContent() {
   const handleResourceToggle = (resourceId: string) => {
     const resource = resources.find((r) => r.id === resourceId)
     const isCurrentlySelected = resource?.selected
-    
+
     setResources((prev) => prev.map((r) => (r.id === resourceId ? { ...r, selected: !r.selected } : r)))
 
     // GA4 이벤트 전송
@@ -564,7 +628,7 @@ function AWSPolicyGeneratorContent() {
   const handleActionToggle = (resourceId: string, actionId: string) => {
     const action = actions[resourceId]?.find((a) => a.id === actionId)
     const isCurrentlySelected = action?.selected
-    
+
     setActions((prev) => ({
       ...prev,
       [resourceId]: prev[resourceId]?.map((a) => (a.id === actionId ? { ...a, selected: !a.selected } : a)) || [],
@@ -652,9 +716,9 @@ function AWSPolicyGeneratorContent() {
 
           {/* 정책 미리보기 패널 (30%) */}
           <div className="col-span-3">
-            <PolicyPreview 
-              selectedResources={selectedResources} 
-              selectedActions={selectedActions} 
+            <PolicyPreview
+              selectedResources={selectedResources}
+              selectedActions={selectedActions}
               getAllAwsActions={getAllAwsActions}
               getPolicyResources={getPolicyResources}
               getPolicyStatements={getPolicyStatements}
@@ -673,9 +737,9 @@ function AWSPolicyGeneratorContent() {
               const [url, afterLink] = rest.split(')')
               return (
                 <span key={index}>
-                  <a 
-                    href={url} 
-                    target="_blank" 
+                  <a
+                    href={url}
+                    target="_blank"
                     rel="noopener noreferrer"
                     className="text-blue-600 hover:text-blue-800 underline"
                   >

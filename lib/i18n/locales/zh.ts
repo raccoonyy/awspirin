@@ -83,15 +83,23 @@ export const zh: Translations = {
     arnLabel: 'ARN（可选）',
     arnPlaceholder: {
       s3: '输入 S3 存储桶 ARN 将对存储桶和对象（/*）都应用权限',
+      ec2: '请输入 EC2 实例 ARN',
+      lambda: '请输入 Lambda 函数 ARN',
       dynamodb: '输入 DynamoDB 表 ARN 将对表和索引（/*）都应用权限',
       cloudwatch: '输入 CloudWatch 日志组 ARN 将对日志组和流（:*）都应用权限',
+      sns: '请输入 SNS 主题 ARN',
+      sqs: '请输入 SQS 队列 ARN',
       default: '留空将应用于所有资源（*）'
     },
     arnHelp: {
-      s3: 'arn:aws:s3:::my-bucket',
-      dynamodb: 'arn:aws:dynamodb:region:account:table/table-name',
-      cloudwatch: 'arn:aws:logs:region:account:log-group:log-group-name',
-      default: 'arn:aws:{service}:region:account:resource'
+      s3: 'arn:aws:s3:::<bucket-name>',
+      ec2: 'arn:aws:ec2:<region>:<account-id>:instance/<instance-id>',
+      lambda: 'arn:aws:lambda:<region>:<account-id>:function:<function-name>',
+      dynamodb: 'arn:aws:dynamodb:<region>:<account-id>:table/<table-name>',
+      cloudwatch: 'arn:aws:logs:<region>:<account-id>:log-group:<log-group-name>',
+      sns: 'arn:aws:sns:<region>:<account-id>:<topic-name>',
+      sqs: 'arn:aws:sqs:<region>:<account-id>:<queue-name>',
+      default: 'arn:aws:{service}:<region>:<account-id>:resource'
     },
     categories: {
       read: '读取权限',

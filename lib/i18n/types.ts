@@ -91,14 +91,22 @@ export interface Translations {
     arnLabel: string // "ARN (선택사항)"
     arnPlaceholder: {
       s3: string
+      ec2: string
+      lambda: string
       dynamodb: string
       cloudwatch: string
+      sns: string
+      sqs: string
       default: string
     }
     arnHelp: {
       s3: string
+      ec2: string
+      lambda: string
       dynamodb: string
       cloudwatch: string
+      sns: string
+      sqs: string
       default: string
     }
     categories: {

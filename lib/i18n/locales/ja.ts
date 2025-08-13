@@ -83,15 +83,23 @@ export const ja: Translations = {
     arnLabel: 'ARN（オプション）',
     arnPlaceholder: {
       s3: 'S3バケットARNを入力すると、バケットとオブジェクト（/*）の両方に権限が適用されます',
+      ec2: 'EC2インスタンスARNを入力してください',
+      lambda: 'Lambda関数ARNを入力してください',
       dynamodb: 'DynamoDBテーブルARNを入力すると、テーブルとインデックス（/*）の両方に権限が適用されます',
       cloudwatch: 'CloudWatchロググループARNを入力すると、ロググループとストリーム（:*）の両方に権限が適用されます',
+      sns: 'SNSトピックARNを入力してください',
+      sqs: 'SQSキューARNを入力してください',
       default: '空白にするとすべてのリソース（*）に適用されます'
     },
     arnHelp: {
-      s3: 'arn:aws:s3:::my-bucket',
-      dynamodb: 'arn:aws:dynamodb:region:account:table/table-name',
-      cloudwatch: 'arn:aws:logs:region:account:log-group:log-group-name',
-      default: 'arn:aws:{service}:region:account:resource'
+      s3: 'arn:aws:s3:::<bucket-name>',
+      ec2: 'arn:aws:ec2:<region>:<account-id>:instance/<instance-id>',
+      lambda: 'arn:aws:lambda:<region>:<account-id>:function:<function-name>',
+      dynamodb: 'arn:aws:dynamodb:<region>:<account-id>:table/<table-name>',
+      cloudwatch: 'arn:aws:logs:<region>:<account-id>:log-group:<log-group-name>',
+      sns: 'arn:aws:sns:<region>:<account-id>:<topic-name>',
+      sqs: 'arn:aws:sqs:<region>:<account-id>:<queue-name>',
+      default: 'arn:aws:{service}:<region>:<account-id>:resource'
     },
     categories: {
       read: '読み取り権限',
