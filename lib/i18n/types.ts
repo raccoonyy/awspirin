@@ -34,6 +34,11 @@ export interface Translations {
     githubIssue: string
   }
 
+  // 푸터
+  footer: {
+    githubIssue: string
+  }
+
   // 리소스 선택 섹션
   resources: {
     title: string

@@ -30,6 +30,10 @@ export const ja: Translations = {
     githubIssue: 'バグ報告や機能提案は[GitHubイシュー](https://github.com/raccoonyy/awspirin/issues/new)をご利用ください'
   },
 
+  footer: {
+    githubIssue: 'バグ報告や機能提案は[GitHubイシュー](https://github.com/raccoonyy/awspirin/issues/new)をご利用ください'
+  },
+
   resources: {
     title: 'AWS リソース選択',
     subtitle: 'ポリシーを適用するAWSサービスを選択してください。',

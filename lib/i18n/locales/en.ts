@@ -30,6 +30,10 @@ export const en: Translations = {
     githubIssue: 'For bug reports or feature requests, please use [GitHub Issues](https://github.com/raccoonyy/awspirin/issues/new)'
   },
 
+  footer: {
+    githubIssue: 'For bug reports or feature requests, please use [GitHub Issues](https://github.com/raccoonyy/awspirin/issues/new)'
+  },
+
   resources: {
     title: 'Select AWS Resources',
     subtitle: 'Choose the AWS services to apply the policy to.',

@@ -617,26 +617,6 @@ function AWSPolicyGeneratorContent() {
             <div>
               <h1 className="text-2xl font-bold text-gray-900">{t('header.title')}</h1>
               <p className="text-sm text-gray-600 mt-1">{t('header.subtitle')}</p>
-              <p className="text-xs text-gray-500 mt-2">
-                {t('header.githubIssue').split('[').map((part, index) => {
-                  if (index === 0) return part
-                  const [linkText, rest] = part.split('](')
-                  const [url, afterLink] = rest.split(')')
-                  return (
-                    <span key={index}>
-                      <a 
-                        href={url} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:text-blue-800 underline"
-                      >
-                        {linkText}
-                      </a>
-                      {afterLink}
-                    </span>
-                  )
-                })}
-              </p>
             </div>
             <LanguageSelector />
           </div>
@@ -674,6 +654,32 @@ function AWSPolicyGeneratorContent() {
           </div>
         </div>
       </main>
+
+      {/* 푸터 */}
+      <footer className="bg-gray-50 border-t border-gray-200 py-8 mt-12">
+        <div className="max-w-7xl mx-auto px-6 text-center">
+          <p className="text-sm text-gray-600">
+            {t('footer.githubIssue').split('[').map((part, index) => {
+              if (index === 0) return part
+              const [linkText, rest] = part.split('](')
+              const [url, afterLink] = rest.split(')')
+              return (
+                <span key={index}>
+                  <a 
+                    href={url} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:text-blue-800 underline"
+                  >
+                    {linkText}
+                  </a>
+                  {afterLink}
+                </span>
+              )
+            })}
+          </p>
+        </div>
+      </footer>
     </div>
   )
 }

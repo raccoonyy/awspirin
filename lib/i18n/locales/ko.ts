@@ -30,6 +30,10 @@ export const ko: Translations = {
     githubIssue: '버그 신고나 기능 제안은 [깃헙 이슈](https://github.com/raccoonyy/awspirin/issues/new)를 사용해주세요'
   },
 
+  footer: {
+    githubIssue: '버그 신고나 기능 제안은 [깃헙 이슈](https://github.com/raccoonyy/awspirin/issues/new)를 사용해주세요'
+  },
+
   resources: {
     title: 'AWS 리소스 선택',
     subtitle: '정책을 적용할 AWS 서비스를 선택하세요.',

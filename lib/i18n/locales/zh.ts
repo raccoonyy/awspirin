@@ -30,6 +30,10 @@ export const zh: Translations = {
     githubIssue: '如需报告错误或提出功能建议，请使用[GitHub Issues](https://github.com/raccoonyy/awspirin/issues/new)'
   },
 
+  footer: {
+    githubIssue: '如需报告错误或提出功能建议，请使用[GitHub Issues](https://github.com/raccoonyy/awspirin/issues/new)'
+  },
+
   resources: {
     title: '选择 AWS 资源',
     subtitle: '选择要应用策略的 AWS 服务。',
