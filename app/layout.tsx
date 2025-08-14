@@ -19,7 +19,7 @@ export const metadata = {
     type: 'website',
     images: [
       {
-        url: '/awspirin/og-image.png',
+        url: '/images/thumbnail.png',
         width: 1200,
         height: 630,
         alt: 'AWSpirin - AWS IAM Policy Generator',
@@ -30,7 +30,9 @@ export const metadata = {
     card: 'summary_large_image',
     title: 'AWSpirin - AWS IAM Policy Generator',
     description: '클릭만으로 편하게 AWS IAM 정책을 생성하세요.',
-    images: ['/awspirin/og-image.png'],
+    images: ['/images/thumbnail.png'],
+    creator: '@awspirin',
+    site: '@awspirin',
   },
   alternates: {
     canonical: 'https://raccoonyy.github.io/awspirin',
