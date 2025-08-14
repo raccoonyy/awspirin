@@ -5,7 +5,7 @@ import { ResourceSelector } from "@/components/resource-selector"
 import { ActionSelector } from "@/components/action-selector"
 import { PolicyPreview } from "@/components/policy-preview"
 import { LanguageSelector } from "@/components/language-selector"
-import { Analytics } from "@/components/analytics"
+import { Analytics, trackEvent } from "@/components/analytics"
 import { I18nProvider, useI18n, useTranslation } from "@/lib/i18n"
 
 export interface AWSResource {
@@ -607,14 +607,12 @@ function AWSPolicyGeneratorContent() {
 
     setResources((prev) => prev.map((r) => (r.id === resourceId ? { ...r, selected: !r.selected } : r)))
 
-    // GA4 이벤트 전송
-    if (typeof window !== 'undefined' && window.gtag) {
-      window.gtag('event', 'resource_toggle', {
-        resource_id: resourceId,
-        resource_name: resource?.name,
-        action: isCurrentlySelected ? 'deselect' : 'select'
-      })
-    }
+    // Analytics 이벤트 전송 (GTM과 GA4 모두 지원)
+    trackEvent('resource_toggle', {
+      resource_id: resourceId,
+      resource_name: resource?.name,
+      action: isCurrentlySelected ? 'deselect' : 'select'
+    })
 
     // 리소스가 선택 해제되면 해당 리소스의 모든 액션도 해제
     if (isCurrentlySelected) {
@@ -634,16 +632,14 @@ function AWSPolicyGeneratorContent() {
       [resourceId]: prev[resourceId]?.map((a) => (a.id === actionId ? { ...a, selected: !a.selected } : a)) || [],
     }))
 
-    // GA4 이벤트 전송
-    if (typeof window !== 'undefined' && window.gtag) {
-      window.gtag('event', 'action_toggle', {
-        resource_id: resourceId,
-        action_id: actionId,
-        action_name: action?.name,
-        action_category: action?.category,
-        action: isCurrentlySelected ? 'deselect' : 'select'
-      })
-    }
+    // Analytics 이벤트 전송 (GTM과 GA4 모두 지원)
+    trackEvent('action_toggle', {
+      resource_id: resourceId,
+      action_id: actionId,
+      action_name: action?.name,
+      action_category: action?.category,
+      action: isCurrentlySelected ? 'deselect' : 'select'
+    })
   }
 
   const handleCategoryToggle = (resourceId: string, category: string, selected: boolean) => {
@@ -664,8 +660,8 @@ function AWSPolicyGeneratorContent() {
     setResources((prev) => prev.map((r) => (r.id === resourceId ? { ...r, arn } : r)))
 
     // ARN 입력 이벤트 전송 (빈 값이 아닐 때만)
-    if (arn.trim() && typeof window !== 'undefined' && window.gtag) {
-      window.gtag('event', 'arn_input', {
+    if (arn.trim()) {
+      trackEvent('arn_input', {
         resource_id: resourceId,
         arn_length: arn.length,
         has_valid_arn: isValidArn(arn)

@@ -63,13 +63,14 @@ jobs:
           NODE_ENV: production
           GITHUB_ACTIONS: true
           GITHUB_REPOSITORY: ${{ github.repository }}
-          NEXT_PUBLIC_GA4_ID: ${{ secrets.GA4_ID }}
+          NEXT_PUBLIC_GA4_ID: ${{ secrets.NEXT_PUBLIC_GA4_ID }}
+          NEXT_PUBLIC_GTM_ID: ${{ secrets.NEXT_PUBLIC_GTM_ID }}
           NEXT_PUBLIC_ENABLE_ANALYTICS: true
         run: |
           cd ${{ env.PROJECT_DIR }}
           echo "Building with repository: $GITHUB_REPOSITORY"
           echo "Repository name: $(echo $GITHUB_REPOSITORY | cut -d'/' -f2)"
-          echo "GA4 enabled: ${{ secrets.GA4_ID != '' }}"
+          echo "GA4 enabled: ${{ secrets.NEXT_PUBLIC_GA4_ID != '' }}"
           npm run build:github
           echo "Build completed. Checking output directory:"
           ls -la out/ || echo "No out directory found"

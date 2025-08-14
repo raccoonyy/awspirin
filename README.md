@@ -61,6 +61,39 @@ AWS IAM 정책을 (두통 없이) 편리하게 생성할 수 있는 웹 애플�
 - ARN별 Statement 분리로 최소 권한 원칙 준수
 - 실제 AWS 액션 코드 표시로 투명성 제공
 
+## 📊 Analytics 설정
+
+이 프로젝트는 Google Analytics 4 (GA4)와 Google Tag Manager (GTM)를 지원합니다.
+
+### 환경변수 설정
+
+`.env.local` 파일에 다음 환경변수를 설정하세요:
+
+```bash
+# Google Analytics 4 설정
+NEXT_PUBLIC_GA4_ID=G-XXXXXXXXXX
+
+# Google Tag Manager 설정 (선택사항)
+NEXT_PUBLIC_GTM_ID=GTM-XXXXXXX
+
+# Analytics 활성화/비활성화
+NEXT_PUBLIC_ENABLE_ANALYTICS=true
+```
+
+### 동작 방식
+
+1. **GTM만 설정된 경우**: GTM을 통해 모든 추적 관리
+2. **GA4만 설정된 경우**: GA4 직접 연결로 추적
+3. **둘 다 설정된 경우**: GTM을 우선 사용하고 GA4는 백업으로 활용
+4. **둘 다 없는 경우**: 추적 비활성화
+
+### 추적되는 이벤트
+
+- `resource_toggle`: 리소스 선택/해제
+- `action_toggle`: 권한 선택/해제  
+- `arn_input`: ARN 입력
+- `page_view`: 페이지 조회
+
 ## 📄 라이선스
 
 MIT License

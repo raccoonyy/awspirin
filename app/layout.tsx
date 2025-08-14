@@ -1,4 +1,5 @@
 import './globals.css'
+import { GTMNoScript } from '@/components/gtm-noscript'
 
 export const metadata = {
   metadataBase: new URL('https://raccoonyy.github.io/awspirin'),
@@ -84,6 +85,7 @@ export default function RootLayout({
         />
       </head>
       <body>
+        <GTMNoScript />
         {children}
       </body>
     </html>
