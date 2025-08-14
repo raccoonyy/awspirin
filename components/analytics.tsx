@@ -50,7 +50,7 @@ export function Analytics() {
         </>
       )}
 
-      {/* Google Analytics 4 (직접 연결 - GTM이 없거나 백업용) */}
+      {/* GTM이 없는 경우에만 GA4 직접 연결 */}
       {GA4_ID && !GTM_ID && (
         <>
           <Script
@@ -69,16 +69,6 @@ export function Analytics() {
             `}
           </Script>
         </>
-      )}
-
-      {/* GTM과 GA4가 모두 있는 경우 dataLayer 초기화만 */}
-      {GA4_ID && GTM_ID && (
-        <Script id="datalayer-init" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-          `}
-        </Script>
       )}
     </>
   )
