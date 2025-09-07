@@ -2,7 +2,7 @@
 
 AWS IAM 정책을 (두통 없이) 편리하게 생성할 수 있는 웹 애플리케이션과 React 컴포넌트 라이브러리입니다.
 
-🔗 **[라이브 데모 보기](https://awspirin.cloud)** | 📦 **[라이브러리 문서](https://awspirin.cloud/library)** | 🎮 **[플레이그라운드](https://awspirin.cloud/playground)**
+🔗 **[라이브 데모 보기](https://raccoonyy.github.io/awspirin/)** | 📦 **[라이브러리 문서](https://raccoonyy.github.io/awspirin/library)** | 🎮 **[플레이그라운드](https://raccoonyy.github.io/awspirin/playground)**
 
 ## ✨ 핵심 기능: 자동 의존성 해결
 
@@ -125,7 +125,7 @@ function App() {
 }
 ```
 
-자세한 사용법은 [라이브러리 문서](https://awspirin.cloud/library)를 참고하세요.
+자세한 사용법은 [라이브러리 문서](https://raccoonyy.github.io/awspirin/library)를 참고하세요.
 
 ## 📄 라이선스
 
