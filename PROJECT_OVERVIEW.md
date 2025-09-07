@@ -5,13 +5,17 @@ A comprehensive AWS IAM Policy Generator available in both React application and
 ## Project Structure
 
 ```
-├── awspirin/                    # Original React application
-├── awspirin-webcomponent/       # Web Component library
-├── shared/                      # Common logic and data
-│   ├── data/                   # AWS resources and actions data
-│   ├── types/                  # TypeScript type definitions
-│   └── utils/                  # Policy generation utilities
-└── examples/                   # Usage examples
+├── awspirin/                    # Main Next.js web application
+│   ├── app/                    # Next.js app router pages
+│   │   ├── page.tsx           # Main tool page
+│   │   └── library/           # Library documentation page
+│   ├── components/            # React components
+│   └── lib/                   # Utilities and helpers
+│
+└── library/                     # Independent React component library
+    ├── src/                    # Library source code
+    ├── examples/               # Usage examples
+    └── dist/                   # Built library files
 ```
 
 ## Components
@@ -26,35 +30,16 @@ The original full-featured React application with:
 
 **Usage**: Visit the deployed application or run locally with `npm run dev`
 
-### 2. Web Component Library (`awspirin-webcomponent/`)
-Framework-agnostic web component for embedding in any website:
-- Lightweight Lit-based implementation
-- Customizable via CSS variables
-- ARN list support
-- Event-driven architecture
-- TypeScript support
-
-**Installation**: `npm install @awspirin/policy-generator`
-
-## Shared Components (`shared/`)
-
-### Types (`shared/types/`)
-Common TypeScript interfaces used across both implementations:
-- `AWSResource`: AWS service definitions
-- `AWSAction`: Permission action definitions  
-- `PolicyStatement`: IAM policy statement structure
-- `IAMPolicy`: Complete IAM policy structure
-
-### Data (`shared/data/`)
-AWS service and action definitions:
-- `aws-resources.ts`: AWS service metadata
-- `aws-actions.ts`: Permission action definitions with dependencies
-
-### Utilities (`shared/utils/`)
-Core policy generation logic:
+### 2. React Component Library (`library/`)
+Independent React component library for embedding in any React application:
+- Standalone implementation with no external dependencies on shared code
+- Full TypeScript support with comprehensive type definitions
+- Customizable themes and styling
 - ARN validation and processing
-- Policy statement generation
-- Service-specific ARN handling (S3, DynamoDB, Lambda, etc.)
+- Event-driven architecture
+- Automatic dependency resolution for AWS actions
+
+**Installation**: `npm install awspirin-lib`
 
 ## Key Features
 
@@ -74,13 +59,13 @@ Core policy generation logic:
 - ✅ Responsive mobile design
 - ✅ SEO optimization
 
-### Web Component Additional Features
-- ✅ Framework agnostic
-- ✅ Minimal bundle size
-- ✅ CSS variable theming
+### Library Additional Features
+- ✅ Standalone package with zero shared dependencies
+- ✅ Comprehensive TypeScript types
+- ✅ Theme customization
 - ✅ ARN list pre-population
 - ✅ Event-driven API
-- ✅ Read-only mode
+- ✅ Tree-shakeable exports
 
 ## Development
 
@@ -94,8 +79,8 @@ Core policy generation logic:
 cd awspirin
 npm install
 
-# Install dependencies for Web Component
-cd ../awspirin-webcomponent
+# Install dependencies for Library
+cd ../library
 npm install
 ```
 
@@ -109,9 +94,9 @@ npm run build        # Build for production
 npm run lint         # Run ESLint
 ```
 
-#### Web Component
+#### Library
 ```bash
-cd awspirin-webcomponent
+cd library
 npm run dev          # Start development server
 npm run build        # Build library
 npm run test         # Run tests
@@ -129,28 +114,27 @@ function App() {
 }
 ```
 
-### Web Component
-```html
-<!-- Basic usage -->
-<aws-policy-generator></aws-policy-generator>
+### Library
+```jsx
+import { PolicyGenerator } from 'awspirin-lib'
 
-<!-- With ARN list -->
-<aws-policy-generator 
-  arn-list='["arn:aws:s3:::my-bucket", "arn:aws:lambda:us-east-1:123456789012:function:my-function"]'>
-</aws-policy-generator>
+// Basic usage
+<PolicyGenerator />
 
-<!-- Custom styling -->
-<aws-policy-generator 
-  style="--aws-primary-color: #0066cc; --aws-secondary-color: #ff6600;">
-</aws-policy-generator>
+// With configuration
+<PolicyGenerator
+  defaultResources={['s3', 'lambda']}
+  onPolicyChange={(policy) => console.log(policy)}
+  theme="light"
+/>
 ```
 
 ### Programmatic Usage
 ```javascript
-import { generateIAMPolicy, isValidArn } from '@awspirin/policy-generator'
+import { generateIAMPolicy, isValidArn } from 'awspirin-lib'
 
 // Generate policy
-const policy = generateIAMPolicy(resources, actions, actionMap)
+const policy = generateIAMPolicy(resources, actions)
 
 // Validate ARN
 const isValid = isValidArn('arn:aws:s3:::my-bucket')
@@ -162,8 +146,7 @@ const isValid = isValidArn('arn:aws:s3:::my-bucket')
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
 3. Make your changes in the appropriate directory:
    - React app changes: `awspirin/`
-   - Web component changes: `awspirin-webcomponent/`
-   - Shared logic changes: `shared/`
+   - Library changes: `library/`
 4. Add tests for new functionality
 5. Ensure all tests pass (`npm test`)
 6. Commit your changes (`git commit -m 'Add amazing feature'`)
@@ -175,8 +158,8 @@ const isValid = isValidArn('arn:aws:s3:::my-bucket')
 - Follow the existing code style (ESLint configuration)
 - Add tests for new features
 - Update documentation for API changes
-- Keep shared logic in the `shared/` directory
-- Maintain compatibility between React and Web Component versions
+- Each project maintains its own independent implementation
+- Follow consistent patterns between projects where applicable
 
 ## License
 
