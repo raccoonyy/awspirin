@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Headless Mode Demo - AWS IAM Policy Generator</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    
+    .demo-container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 1rem;
+      color: white;
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 6px;
+      backdrop-filter: blur(10px);
+    }
+    
+    .back-link:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+    
+    .demo-header {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+    
+    .demo-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+    
+    .demo-section {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+    
+    .code-block {
+      background: #2c3e50;
+      color: #ecf0f1;
+      padding: 1.5rem;
+      border-radius: 8px;
+      font-family: 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      overflow-x: auto;
+      margin: 1rem 0;
+      white-space: pre-wrap;
+    }
+    
+    .api-demo {
+      display: grid;
+      gap: 1rem;
+    }
+    
+    .control-group {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+    
+    .control-group label {
+      font-weight: 600;
+      color: #34495e;
+      min-width: 100px;
+    }
+    
+    .control-group select,
+    .control-group button {
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      border: 1px solid #dee2e6;
+      background: white;
+      cursor: pointer;
+    }
+    
+    .control-group button {
+      background: #3498db;
+      color: white;
+      border: none;
+    }
+    
+    .control-group button:hover {
+      background: #2980b9;
+    }
+    
+    .control-group button.danger {
+      background: #e74c3c;
+    }
+    
+    .control-group button.danger:hover {
+      background: #c0392b;
+    }
+    
+    .checkbox-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+    
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem;
+      background: #f8f9fa;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    
+    .checkbox-item:hover {
+      background: #e9ecef;
+    }
+    
+    .checkbox-item.selected {
+      background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+      border: 1px solid #667eea;
+    }
+    
+    .arn-input {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #dee2e6;
+      border-radius: 6px;
+      font-family: monospace;
+    }
+    
+    .state-display {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 1rem;
+      margin: 1rem 0;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    
+    .state-display pre {
+      font-size: 0.9rem;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    
+    .dependency-highlight {
+      background: #fff3cd;
+      padding: 1rem;
+      border-radius: 6px;
+      border-left: 4px solid #ffc107;
+      margin: 1rem 0;
+    }
+    
+    .dependency-highlight h4 {
+      color: #856404;
+      margin-bottom: 0.5rem;
+    }
+    
+    .dependency-list {
+      list-style: none;
+      padding: 0;
+    }
+    
+    .dependency-list li {
+      padding: 0.25rem 0;
+      color: #856404;
+    }
+    
+    .dependency-list li:before {
+      content: '▸ ';
+      font-weight: bold;
+    }
+    
+    @media (max-width: 768px) {
+      .demo-content {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="demo-container">
+    <a href="index.html" class="back-link">← Back to Examples</a>
+    
+    <div class="demo-header">
+      <h1>⚡ Headless Mode Demo</h1>
+      <p>
+        This demo shows the core PolicyCore class in action without any UI framework dependencies.
+        You can interact with the API directly and see how dependency resolution works under the hood.
+        Perfect for server-side usage, CLI tools, or integrating with any frontend framework.
+      </p>
+    </div>
+    
+    <div class="demo-content">
+      <!-- Left Panel: API Controls -->
+      <div class="demo-section">
+        <h2>🛠️ API Controls</h2>
+        
+        <div class="api-demo">
+          <div class="control-group">
+            <label>Resource:</label>
+            <select id="resource-select">
+              <option value="">Select a resource...</option>
+              <option value="s3">S3 Bucket</option>
+              <option value="ec2">EC2 Instance</option>
+              <option value="lambda">Lambda Function</option>
+              <option value="dynamodb">DynamoDB Table</option>
+            </select>
+            <button id="add-resource-btn">Add Resource</button>
+          </div>
+          
+          <div id="actions-section" style="display: none;">
+            <label style="font-weight: 600; color: #34495e;">Actions:</label>
+            <div class="checkbox-group" id="actions-list"></div>
+            
+            <input 
+              type="text" 
+              class="arn-input" 
+              id="arn-input" 
+              placeholder="arn:aws:service:region:account:resource"
+            />
+            
+            <div class="control-group">
+              <button id="set-actions-btn">Set Actions</button>
+              <button id="set-arn-btn">Set ARN</button>
+              <button id="generate-policy-btn">Generate Policy</button>
+              <button id="reset-btn" class="danger">Reset</button>
+            </div>
+          </div>
+          
+          <div id="dependency-info"></div>
+        </div>
+        
+        <h3>🔍 Current State</h3>
+        <div class="state-display">
+          <pre id="state-display" style="margin: 0; font-family: 'Monaco', 'Courier New', monospace;">No state to display</pre>
+        </div>
+      </div>
+      
+      <!-- Right Panel: Output -->
+      <div class="demo-section">
+        <h2>📋 Generated Policy</h2>
+        <div class="code-block" id="policy-output">
+{
+  "Version": "2012-10-17",
+  "Statement": []
+}
+        </div>
+        
+        <h3>💡 Usage Example</h3>
+        <div class="code-block">
+// Headless usage in Node.js
+const { PolicyCore } = require('@awspirin/awspirin-lib/core');
+
+const core = new PolicyCore();
+
+// Add a resource
+core.addResource({
+  id: 's3-bucket',
+  name: 'S3 Bucket',
+  service: 's3',
+  actions: [...]
+});
+
+// Set up dependency resolver
+core.setDependencyResolver((actions) => {
+  // Your dependency resolution logic
+  return resolvedActions;
+});
+
+// Configure permissions
+core.setActions('s3-bucket', ['s3:GetObject']);
+core.setARN('s3-bucket', 'arn:aws:s3:::my-bucket/*');
+
+// Generate policy
+const policy = core.generatePolicy();
+console.log(JSON.stringify(policy, null, 2));
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Mock PolicyCore for demo (would normally import from library)
+    class PolicyCore {
+      constructor() {
+        this.resources = new Map();
+        this.selections = new Map();
+        this.dependencyResolver = null;
+        this.dependencies = {
+          's3:GetObject': ['s3:ListBucket', 's3:GetBucketLocation'],
+          's3:PutObject': ['s3:ListBucket'],
+          's3:DeleteObject': ['s3:ListBucket'],
+          'ec2:TerminateInstances': ['ec2:DescribeInstances'],
+          'ec2:StopInstances': ['ec2:DescribeInstances'],
+          'ec2:StartInstances': ['ec2:DescribeInstances'],
+          'lambda:InvokeFunction': ['lambda:GetFunction'],
+          'lambda:UpdateFunctionCode': ['lambda:GetFunction'],
+          'lambda:DeleteFunction': ['lambda:GetFunction'],
+          'dynamodb:GetItem': ['dynamodb:DescribeTable'],
+          'dynamodb:PutItem': ['dynamodb:DescribeTable'],
+          'dynamodb:Query': ['dynamodb:DescribeTable'],
+          'dynamodb:Scan': ['dynamodb:DescribeTable']
+        };
+      }
+
+      addResource(resource) {
+        this.resources.set(resource.id, resource);
+        if (!this.selections.has(resource.id)) {
+          this.selections.set(resource.id, {
+            resourceId: resource.id,
+            actions: [],
+            arn: undefined
+          });
+        }
+      }
+
+      setActions(resourceId, actions) {
+        const selection = this.selections.get(resourceId);
+        if (selection) {
+          selection.actions = [...new Set(actions)];
+        }
+      }
+
+      setARN(resourceId, arn) {
+        const selection = this.selections.get(resourceId);
+        if (selection) {
+          selection.arn = arn;
+        }
+      }
+
+      setDependencyResolver(resolver) {
+        this.dependencyResolver = resolver;
+      }
+
+      resolveDependencies(actions) {
+        const resolved = new Set(actions);
+        actions.forEach(action => {
+          const deps = this.dependencies[action];
+          if (deps) {
+            deps.forEach(dep => resolved.add(dep));
+          }
+        });
+        return Array.from(resolved).sort();
+      }
+
+      generatePolicy() {
+        const statements = [];
+        
+        this.selections.forEach((selection) => {
+          if (selection.actions.length === 0) return;
+          
+          const resource = this.resources.get(selection.resourceId);
+          if (!resource) return;
+          
+          const resolvedActions = this.resolveDependencies(selection.actions);
+          const resourceArn = selection.arn || '*';
+          
+          statements.push({
+            Effect: 'Allow',
+            Action: resolvedActions,
+            Resource: resourceArn
+          });
+        });
+
+        return {
+          Version: '2012-10-17',
+          Statement: statements
+        };
+      }
+
+      getState() {
+        return {
+          resources: Array.from(this.resources.values()),
+          selections: Array.from(this.selections.values())
+        };
+      }
+
+      reset() {
+        this.resources.clear();
+        this.selections.clear();
+      }
+    }
+
+    // Demo setup
+    const core = new PolicyCore();
+    let currentResourceId = '';
+
+    const resources = {
+      s3: {
+        id: 's3-demo',
+        name: 'S3 Bucket',
+        service: 's3',
+        actions: [
+          { id: 's3:ListBucket', name: 'List Bucket' },
+          { id: 's3:GetBucketLocation', name: 'Get Bucket Location' },
+          { id: 's3:GetObject', name: 'Get Object' },
+          { id: 's3:PutObject', name: 'Put Object' },
+          { id: 's3:DeleteObject', name: 'Delete Object' }
+        ]
+      },
+      ec2: {
+        id: 'ec2-demo',
+        name: 'EC2 Instance',
+        service: 'ec2',
+        actions: [
+          { id: 'ec2:DescribeInstances', name: 'Describe Instances' },
+          { id: 'ec2:StartInstances', name: 'Start Instances' },
+          { id: 'ec2:StopInstances', name: 'Stop Instances' },
+          { id: 'ec2:TerminateInstances', name: 'Terminate Instances' }
+        ]
+      },
+      lambda: {
+        id: 'lambda-demo',
+        name: 'Lambda Function',
+        service: 'lambda',
+        actions: [
+          { id: 'lambda:GetFunction', name: 'Get Function' },
+          { id: 'lambda:InvokeFunction', name: 'Invoke Function' },
+          { id: 'lambda:UpdateFunctionCode', name: 'Update Function Code' },
+          { id: 'lambda:DeleteFunction', name: 'Delete Function' }
+        ]
+      },
+      dynamodb: {
+        id: 'dynamodb-demo',
+        name: 'DynamoDB Table',
+        service: 'dynamodb',
+        actions: [
+          { id: 'dynamodb:DescribeTable', name: 'Describe Table' },
+          { id: 'dynamodb:GetItem', name: 'Get Item' },
+          { id: 'dynamodb:PutItem', name: 'Put Item' },
+          { id: 'dynamodb:Query', name: 'Query' },
+          { id: 'dynamodb:Scan', name: 'Scan' }
+        ]
+      }
+    };
+
+    function updateState() {
+      const state = core.getState();
+      document.getElementById('state-display').textContent = JSON.stringify(state, null, 2);
+      
+      const policy = core.generatePolicy();
+      document.getElementById('policy-output').textContent = JSON.stringify(policy, null, 2);
+    }
+
+    function showDependencyInfo(selectedActions) {
+      const dependencyInfo = document.getElementById('dependency-info');
+      const deps = [];
+      
+      selectedActions.forEach(action => {
+        if (core.dependencies[action]) {
+          deps.push({
+            action: action,
+            dependencies: core.dependencies[action]
+          });
+        }
+      });
+
+      if (deps.length > 0) {
+        const html = `
+          <div class="dependency-highlight">
+            <h4>🔗 Dependency Resolution Active</h4>
+            ${deps.map(d => `
+              <div>
+                <strong>${d.action}</strong> will include:
+                <ul class="dependency-list">
+                  ${d.dependencies.map(dep => `<li>${dep}</li>`).join('')}
+                </ul>
+              </div>
+            `).join('')}
+          </div>
+        `;
+        dependencyInfo.innerHTML = html;
+      } else {
+        dependencyInfo.innerHTML = '';
+      }
+    }
+
+    // Event listeners
+    document.getElementById('add-resource-btn').addEventListener('click', () => {
+      const select = document.getElementById('resource-select');
+      const resourceKey = select.value;
+      if (resourceKey && resources[resourceKey]) {
+        const resource = resources[resourceKey];
+        core.addResource(resource);
+        currentResourceId = resource.id;
+        
+        // Show actions section
+        const actionsSection = document.getElementById('actions-section');
+        actionsSection.style.display = 'block';
+        
+        // Populate actions
+        const actionsList = document.getElementById('actions-list');
+        actionsList.innerHTML = resource.actions.map(action => `
+          <div class="checkbox-item" data-action="${action.id}">
+            <input type="checkbox" id="${action.id}" />
+            <label for="${action.id}">${action.name}</label>
+          </div>
+        `).join('');
+        
+        // Update ARN placeholder
+        const arnInput = document.getElementById('arn-input');
+        arnInput.placeholder = `arn:aws:${resource.service}:region:account:resource`;
+        
+        updateState();
+      }
+    });
+
+    document.getElementById('set-actions-btn').addEventListener('click', () => {
+      if (!currentResourceId) return;
+      
+      const selectedActions = Array.from(document.querySelectorAll('.checkbox-item input:checked'))
+        .map(input => input.id);
+      
+      core.setActions(currentResourceId, selectedActions);
+      showDependencyInfo(selectedActions);
+      updateState();
+      
+      // Update UI to show selected items
+      document.querySelectorAll('.checkbox-item').forEach(item => {
+        const input = item.querySelector('input');
+        if (input.checked) {
+          item.classList.add('selected');
+        } else {
+          item.classList.remove('selected');
+        }
+      });
+    });
+
+    document.getElementById('set-arn-btn').addEventListener('click', () => {
+      if (!currentResourceId) return;
+      
+      const arn = document.getElementById('arn-input').value;
+      core.setARN(currentResourceId, arn);
+      updateState();
+    });
+
+    document.getElementById('generate-policy-btn').addEventListener('click', () => {
+      updateState();
+    });
+
+    document.getElementById('reset-btn').addEventListener('click', () => {
+      core.reset();
+      currentResourceId = '';
+      document.getElementById('actions-section').style.display = 'none';
+      document.getElementById('resource-select').value = '';
+      document.getElementById('dependency-info').innerHTML = '';
+      updateState();
+    });
+
+    // Checkbox change handlers
+    document.addEventListener('change', (e) => {
+      if (e.target.type === 'checkbox' && e.target.closest('.checkbox-item')) {
+        const item = e.target.closest('.checkbox-item');
+        if (e.target.checked) {
+          item.classList.add('selected');
+        } else {
+          item.classList.remove('selected');
+        }
+      }
+    });
+
+    // Initial state
+    updateState();
+  </script>
+</body>
+</html>

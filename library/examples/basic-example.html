@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Basic Example - AWS IAM Policy Generator</title>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <link rel="stylesheet" href="dist/style.css">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+    
+    .demo-container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    
+    .demo-header {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+    
+    .demo-header h1 {
+      margin: 0 0 1rem 0;
+      color: #2c3e50;
+    }
+    
+    .demo-header p {
+      color: #7f8c8d;
+      margin: 0 0 1.5rem 0;
+      line-height: 1.6;
+    }
+    
+    .controls {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    
+    .control-group label {
+      font-weight: 600;
+      color: #34495e;
+      font-size: 0.9rem;
+    }
+    
+    .control-group select,
+    .control-group button {
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      border: 1px solid #dee2e6;
+      background: white;
+      cursor: pointer;
+      font-size: 0.95rem;
+    }
+    
+    .control-group button {
+      background: #3498db;
+      color: white;
+      border: none;
+    }
+    
+    .control-group button:hover {
+      background: #2980b9;
+    }
+    
+    .demo-content {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      min-height: 600px;
+    }
+    
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 1rem;
+      color: white;
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 6px;
+      backdrop-filter: blur(10px);
+    }
+    
+    .back-link:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+    
+    #root {
+      min-height: 500px;
+    }
+  </style>
+</head>
+<body>
+  <div class="demo-container">
+    <a href="index.html" class="back-link">← Back to Examples</a>
+    
+    <div class="demo-header">
+      <h1>📱 Basic Example with ARN Dropdown</h1>
+      <p>
+        This example demonstrates the basic usage of the PolicyGenerator component with ARN dropdown functionality.
+        The component automatically detects whether to show a dropdown (when ARN list is provided) or an input field (when no list is provided).
+      </p>
+      
+      <div class="controls">
+        <div class="control-group">
+          <label>Theme</label>
+          <select id="theme-selector">
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+          </select>
+        </div>
+        
+        <div class="control-group">
+          <label>Layout</label>
+          <select id="layout-selector">
+            <option value="responsive">Responsive</option>
+            <option value="horizontal">Horizontal</option>
+            <option value="vertical">Vertical</option>
+          </select>
+        </div>
+        
+        <div class="control-group">
+          <label>ARN Mode</label>
+          <select id="arn-mode-selector">
+            <option value="auto">Auto</option>
+            <option value="dropdown">Dropdown Only</option>
+            <option value="input">Input Only</option>
+            <option value="both">Both</option>
+          </select>
+        </div>
+        
+        <div class="control-group">
+          <label>Actions</label>
+          <button id="add-arns">Add Sample ARNs</button>
+        </div>
+        
+        <div class="control-group">
+          <label>&nbsp;</label>
+          <button id="clear-arns">Clear ARNs</button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="demo-content">
+      <div id="root"></div>
+    </div>
+  </div>
+
+  <script type="text/babel">
+    // Mock the PolicyGenerator component for demonstration
+    function PolicyGenerator({ arnList = [], theme = 'light', layout = 'responsive', arnInputMode = 'auto', onChange }) {
+      const [selectedResources, setSelectedResources] = React.useState([]);
+      const [resourceSelections, setResourceSelections] = React.useState({});
+      // resourceSelections structure: { resourceId: { actions: [], arn: '' } }
+
+      const resources = [
+        { id: 's3', name: 'S3 Bucket', service: 's3' },
+        { id: 'ec2', name: 'EC2 Instance', service: 'ec2' },
+        { id: 'lambda', name: 'Lambda Function', service: 'lambda' },
+        { id: 'dynamodb', name: 'DynamoDB Table', service: 'dynamodb' }
+      ];
+
+      const actions = {
+        s3: ['s3:GetObject', 's3:PutObject', 's3:DeleteObject', 's3:ListBucket'],
+        ec2: ['ec2:DescribeInstances', 'ec2:StartInstances', 'ec2:StopInstances', 'ec2:TerminateInstances'],
+        lambda: ['lambda:InvokeFunction', 'lambda:GetFunction', 'lambda:UpdateFunctionCode'],
+        dynamodb: ['dynamodb:GetItem', 'dynamodb:PutItem', 'dynamodb:Query', 'dynamodb:Scan']
+      };
+
+      // Simple dependency resolution for demo
+      const resolveDependencies = (actions, resourceType) => {
+        const deps = {
+          's3:GetObject': ['s3:ListBucket', 's3:GetBucketLocation'],
+          's3:PutObject': ['s3:ListBucket'],
+          's3:DeleteObject': ['s3:ListBucket'],
+          'ec2:TerminateInstances': ['ec2:DescribeInstances'],
+          'ec2:StopInstances': ['ec2:DescribeInstances'],
+          'ec2:StartInstances': ['ec2:DescribeInstances'],
+          'lambda:InvokeFunction': ['lambda:GetFunction'],
+          'lambda:UpdateFunctionCode': ['lambda:GetFunction'],
+          'lambda:DeleteFunction': ['lambda:GetFunction'],
+          'dynamodb:GetItem': ['dynamodb:DescribeTable'],
+          'dynamodb:PutItem': ['dynamodb:DescribeTable'],
+          'dynamodb:Query': ['dynamodb:DescribeTable'],
+          'dynamodb:Scan': ['dynamodb:DescribeTable']
+        };
+
+        const resolved = new Set(actions);
+        actions.forEach(action => {
+          if (deps[action]) {
+            deps[action].forEach(dep => resolved.add(dep));
+          }
+        });
+        return Array.from(resolved);
+      };
+
+      React.useEffect(() => {
+        const statements = [];
+        const actionsWithoutArn = [];
+        
+        selectedResources.forEach(resourceId => {
+          const selection = resourceSelections[resourceId];
+          if (!selection || selection.actions.length === 0) return;
+          
+          const resolvedActions = resolveDependencies(selection.actions, resourceId);
+          
+          if (selection.arn) {
+            // Create separate statement for each ARN
+            statements.push({
+              Effect: 'Allow',
+              Action: resolvedActions,
+              Resource: selection.arn
+            });
+          } else {
+            // Collect actions without ARN to group them
+            actionsWithoutArn.push(...resolvedActions);
+          }
+        });
+        
+        // Add grouped statement for actions without ARN
+        if (actionsWithoutArn.length > 0) {
+          statements.push({
+            Effect: 'Allow',
+            Action: [...new Set(actionsWithoutArn)].sort(),
+            Resource: '*'
+          });
+        }
+        
+        const policy = {
+          Version: '2012-10-17',
+          Statement: statements
+        };
+        onChange?.(policy);
+      }, [selectedResources, resourceSelections]);
+
+      const containerStyle = layout === 'horizontal' || (layout === 'responsive' && window.innerWidth > 768)
+        ? { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }
+        : { display: 'flex', flexDirection: 'column', gap: '1rem' };
+
+      // Generate policy for display
+      const generateDisplayPolicy = () => {
+        const statements = [];
+        const actionsWithoutArn = [];
+        
+        selectedResources.forEach(resourceId => {
+          const selection = resourceSelections[resourceId];
+          if (!selection || selection.actions.length === 0) return;
+          
+          const resolvedActions = resolveDependencies(selection.actions, resourceId);
+          
+          if (selection.arn) {
+            statements.push({
+              Effect: 'Allow',
+              Action: resolvedActions,
+              Resource: selection.arn
+            });
+          } else {
+            actionsWithoutArn.push(...resolvedActions);
+          }
+        });
+        
+        if (actionsWithoutArn.length > 0) {
+          statements.push({
+            Effect: 'Allow',
+            Action: [...new Set(actionsWithoutArn)].sort(),
+            Resource: '*'
+          });
+        }
+        
+        return {
+          Version: '2012-10-17',
+          Statement: statements
+        };
+      };
+
+      const policyToShow = generateDisplayPolicy();
+
+      return (
+        <div className={`awspirin-lib theme-${theme}`} style={containerStyle}>
+          {/* Resource Selection */}
+          <div style={{ padding: '1.5rem', background: '#f8f9fa', borderRadius: '8px' }}>
+            <h3 style={{ margin: '0 0 1rem 0', color: '#2c3e50' }}>1. Select AWS Resources</h3>
+            {resources.map(resource => (
+              <div key={resource.id} style={{ marginBottom: '0.5rem' }}>
+                <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    value={resource.id}
+                    checked={selectedResources.includes(resource.id)}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedResources([...selectedResources, resource.id]);
+                        setResourceSelections({
+                          ...resourceSelections,
+                          [resource.id]: { actions: [], arn: '' }
+                        });
+                      } else {
+                        setSelectedResources(selectedResources.filter(id => id !== resource.id));
+                        const newSelections = { ...resourceSelections };
+                        delete newSelections[resource.id];
+                        setResourceSelections(newSelections);
+                      }
+                    }}
+                    style={{ marginRight: '0.5rem' }}
+                  />
+                  <span>{resource.name} ({resource.service})</span>
+                </label>
+              </div>
+            ))}
+          </div>
+
+          {/* Action Selection */}
+          <div style={{ padding: '1.5rem', background: '#f8f9fa', borderRadius: '8px' }}>
+            <h3 style={{ margin: '0 0 1rem 0', color: '#2c3e50' }}>2. Configure Actions & ARNs</h3>
+            {selectedResources.length > 0 ? (
+              selectedResources.map(resourceId => {
+                const resource = resources.find(r => r.id === resourceId);
+                const selection = resourceSelections[resourceId] || { actions: [], arn: '' };
+                const filteredArns = arnList.filter(arn => arn.service === resource.service);
+                const showDropdown = (arnInputMode === 'dropdown' || arnInputMode === 'both' || 
+                                     (arnInputMode === 'auto' && filteredArns.length > 0));
+                const showInput = (arnInputMode === 'input' || arnInputMode === 'both' || 
+                                  (arnInputMode === 'auto' && filteredArns.length === 0));
+                
+                return (
+                  <div key={resourceId} style={{ 
+                    marginBottom: '2rem', 
+                    padding: '1rem', 
+                    background: 'white', 
+                    borderRadius: '6px',
+                    border: '1px solid #dee2e6'
+                  }}>
+                    <h4 style={{ margin: '0 0 1rem 0', color: '#2c3e50' }}>
+                      {resource.name} ({resource.service})
+                    </h4>
+                    
+                    {/* ARN Input/Dropdown */}
+                    <div style={{ marginBottom: '1rem' }}>
+                      <h5 style={{ margin: '0 0 0.5rem 0', color: '#34495e', fontSize: '0.9rem' }}>Resource ARN</h5>
+                      
+                      {showInput && (
+                        <input
+                          type="text"
+                          placeholder={`arn:aws:${resource.service}:region:account:resource`}
+                          value={selection.arn}
+                          onChange={(e) => {
+                            setResourceSelections({
+                              ...resourceSelections,
+                              [resourceId]: { ...selection, arn: e.target.value }
+                            });
+                          }}
+                          style={{
+                            width: '100%',
+                            padding: '0.5rem',
+                            border: '1px solid #dee2e6',
+                            borderRadius: '4px',
+                            marginBottom: showDropdown ? '0.5rem' : '0',
+                            fontSize: '0.85rem'
+                          }}
+                        />
+                      )}
+                      
+                      {showDropdown && filteredArns.length > 0 && (
+                        <select
+                          value={selection.arn}
+                          onChange={(e) => {
+                            setResourceSelections({
+                              ...resourceSelections,
+                              [resourceId]: { ...selection, arn: e.target.value }
+                            });
+                          }}
+                          style={{
+                            width: '100%',
+                            padding: '0.5rem',
+                            border: '1px solid #dee2e6',
+                            borderRadius: '4px',
+                            fontSize: '0.85rem'
+                          }}
+                        >
+                          <option value="">Select an ARN...</option>
+                          {filteredArns.map(arn => (
+                            <option key={arn.arn} value={arn.arn}>
+                              {arn.displayName} - {arn.arn}
+                            </option>
+                          ))}
+                        </select>
+                      )}
+                    </div>
+
+                    {/* Actions */}
+                    <h5 style={{ margin: '0 0 0.5rem 0', color: '#34495e', fontSize: '0.9rem' }}>Actions</h5>
+                    <div style={{ maxHeight: '150px', overflowY: 'auto' }}>
+                      {actions[resourceId]?.map(action => (
+                        <div key={action} style={{ marginBottom: '0.25rem' }}>
+                          <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', fontSize: '0.9rem' }}>
+                            <input
+                              type="checkbox"
+                              value={action}
+                              checked={selection.actions.includes(action)}
+                              onChange={(e) => {
+                                const newActions = e.target.checked 
+                                  ? [...selection.actions, action]
+                                  : selection.actions.filter(a => a !== action);
+                                setResourceSelections({
+                                  ...resourceSelections,
+                                  [resourceId]: { ...selection, actions: newActions }
+                                });
+                              }}
+                              style={{ marginRight: '0.5rem' }}
+                            />
+                            <span>{action}</span>
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <p style={{ color: '#7f8c8d' }}>Please select one or more resources first</p>
+            )}
+          </div>
+
+          {/* Policy Section */}
+          <div style={{ padding: '1.5rem', background: '#f8f9fa', borderRadius: '8px' }}>
+            <h3 style={{ margin: '0 0 1rem 0', color: '#2c3e50' }}>3. Generated Policy</h3>
+            <div style={{
+              background: '#2c3e50',
+              color: '#ecf0f1',
+              padding: '1rem',
+              borderRadius: '4px',
+              fontFamily: 'monospace',
+              fontSize: '0.85rem',
+              maxHeight: '300px',
+              overflow: 'auto'
+            }}>
+              <pre style={{ margin: 0 }}>{JSON.stringify(policyToShow, null, 2)}</pre>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Main App
+    function App() {
+      const [arnList, setArnList] = React.useState([]);
+      const [theme, setTheme] = React.useState('light');
+      const [layout, setLayout] = React.useState('responsive');
+      const [arnMode, setArnMode] = React.useState('auto');
+      const [policy, setPolicy] = React.useState({ Version: '2012-10-17', Statement: [] });
+
+      const sampleARNs = [
+        {
+          arn: 'arn:aws:s3:::my-app-bucket/*',
+          service: 's3',
+          displayName: 'My App Bucket',
+          description: 'Main application storage'
+        },
+        {
+          arn: 'arn:aws:s3:::backup-bucket/*',
+          service: 's3',
+          displayName: 'Backup Bucket',
+          description: 'Backup storage'
+        },
+        {
+          arn: 'arn:aws:ec2:us-east-1:123456789012:instance/i-1234567890abcdef0',
+          service: 'ec2',
+          displayName: 'Production Server',
+          description: 'Main web server'
+        },
+        {
+          arn: 'arn:aws:ec2:us-east-1:123456789012:instance/i-0987654321fedcba0',
+          service: 'ec2',
+          displayName: 'Development Server',
+          description: 'Dev environment'
+        },
+        {
+          arn: 'arn:aws:lambda:us-west-2:123456789012:function:processOrders',
+          service: 'lambda',
+          displayName: 'Process Orders Function',
+          description: 'Order processing'
+        },
+        {
+          arn: 'arn:aws:dynamodb:us-east-1:123456789012:table/Users',
+          service: 'dynamodb',
+          displayName: 'Users Table',
+          description: 'User data storage'
+        }
+      ];
+
+      React.useEffect(() => {
+        // Update controls
+        document.getElementById('theme-selector').value = theme;
+        document.getElementById('layout-selector').value = layout;
+        document.getElementById('arn-mode-selector').value = arnMode;
+      }, [theme, layout, arnMode]);
+
+      React.useEffect(() => {
+        // Setup event listeners
+        const themeSelector = document.getElementById('theme-selector');
+        const layoutSelector = document.getElementById('layout-selector');
+        const arnModeSelector = document.getElementById('arn-mode-selector');
+        const addArnsBtn = document.getElementById('add-arns');
+        const clearArnsBtn = document.getElementById('clear-arns');
+
+        const handleThemeChange = (e) => setTheme(e.target.value);
+        const handleLayoutChange = (e) => setLayout(e.target.value);
+        const handleArnModeChange = (e) => setArnMode(e.target.value);
+        const handleAddArns = () => setArnList(sampleARNs);
+        const handleClearArns = () => setArnList([]);
+
+        themeSelector.addEventListener('change', handleThemeChange);
+        layoutSelector.addEventListener('change', handleLayoutChange);
+        arnModeSelector.addEventListener('change', handleArnModeChange);
+        addArnsBtn.addEventListener('click', handleAddArns);
+        clearArnsBtn.addEventListener('click', handleClearArns);
+
+        return () => {
+          themeSelector.removeEventListener('change', handleThemeChange);
+          layoutSelector.removeEventListener('change', handleLayoutChange);
+          arnModeSelector.removeEventListener('change', handleArnModeChange);
+          addArnsBtn.removeEventListener('click', handleAddArns);
+          clearArnsBtn.removeEventListener('click', handleClearArns);
+        };
+      }, []);
+
+      return (
+        <PolicyGenerator
+          arnList={arnList}
+          theme={theme}
+          layout={layout}
+          arnInputMode={arnMode}
+          onChange={setPolicy}
+        />
+      );
+    }
+
+    // Render the app
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+</body>
+</html>

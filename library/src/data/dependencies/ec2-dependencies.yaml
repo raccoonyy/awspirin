@@ -1,0 +1,67 @@
+service: ec2
+dependencies:
+  ec2:DescribeInstances:
+    actions:
+      - ec2:DescribeInstances
+    dependencies: []
+  
+  ec2:DescribeInstanceAttribute:
+    actions:
+      - ec2:DescribeInstanceAttribute
+    dependencies: []
+  
+  ec2:DescribeVolumes:
+    actions:
+      - ec2:DescribeVolumes
+    dependencies: []
+  
+  ec2:TerminateInstances:
+    actions:
+      - ec2:TerminateInstances
+    dependencies:
+      - ec2:DescribeInstances
+  
+  ec2:StopInstances:
+    actions:
+      - ec2:StopInstances
+    dependencies:
+      - ec2:DescribeInstances
+  
+  ec2:StartInstances:
+    actions:
+      - ec2:StartInstances
+    dependencies:
+      - ec2:DescribeInstances
+  
+  ec2:RebootInstances:
+    actions:
+      - ec2:RebootInstances
+    dependencies:
+      - ec2:DescribeInstances
+  
+  ec2:ModifyInstanceAttribute:
+    actions:
+      - ec2:ModifyInstanceAttribute
+    dependencies:
+      - ec2:DescribeInstances
+      - ec2:DescribeInstanceAttribute
+  
+  ec2:AttachVolume:
+    actions:
+      - ec2:AttachVolume
+    dependencies:
+      - ec2:DescribeVolumes
+      - ec2:DescribeInstances
+  
+  ec2:DetachVolume:
+    actions:
+      - ec2:DetachVolume
+    dependencies:
+      - ec2:DescribeVolumes
+      - ec2:DescribeInstances
+  
+  ec2:CreateSnapshot:
+    actions:
+      - ec2:CreateSnapshot
+    dependencies:
+      - ec2:DescribeVolumes

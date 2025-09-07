@@ -1,0 +1,53 @@
+service: lambda
+dependencies:
+  lambda:GetFunction:
+    actions:
+      - lambda:GetFunction
+    dependencies: []
+  
+  lambda:ListFunctions:
+    actions:
+      - lambda:ListFunctions
+    dependencies: []
+  
+  lambda:InvokeFunction:
+    actions:
+      - lambda:InvokeFunction
+    dependencies:
+      - lambda:GetFunction
+  
+  lambda:UpdateFunctionCode:
+    actions:
+      - lambda:UpdateFunctionCode
+    dependencies:
+      - lambda:GetFunction
+  
+  lambda:UpdateFunctionConfiguration:
+    actions:
+      - lambda:UpdateFunctionConfiguration
+    dependencies:
+      - lambda:GetFunction
+  
+  lambda:DeleteFunction:
+    actions:
+      - lambda:DeleteFunction
+    dependencies:
+      - lambda:GetFunction
+  
+  lambda:TagResource:
+    actions:
+      - lambda:TagResource
+    dependencies:
+      - lambda:GetFunction
+  
+  lambda:CreateAlias:
+    actions:
+      - lambda:CreateAlias
+    dependencies:
+      - lambda:GetFunction
+  
+  lambda:PublishVersion:
+    actions:
+      - lambda:PublishVersion
+    dependencies:
+      - lambda:GetFunction

@@ -1,0 +1,59 @@
+service: dynamodb
+dependencies:
+  dynamodb:DescribeTable:
+    actions:
+      - dynamodb:DescribeTable
+    dependencies: []
+  
+  dynamodb:ListTables:
+    actions:
+      - dynamodb:ListTables
+    dependencies: []
+  
+  dynamodb:GetItem:
+    actions:
+      - dynamodb:GetItem
+    dependencies:
+      - dynamodb:DescribeTable
+  
+  dynamodb:PutItem:
+    actions:
+      - dynamodb:PutItem
+    dependencies:
+      - dynamodb:DescribeTable
+  
+  dynamodb:UpdateItem:
+    actions:
+      - dynamodb:UpdateItem
+    dependencies:
+      - dynamodb:DescribeTable
+  
+  dynamodb:DeleteItem:
+    actions:
+      - dynamodb:DeleteItem
+    dependencies:
+      - dynamodb:DescribeTable
+  
+  dynamodb:Query:
+    actions:
+      - dynamodb:Query
+    dependencies:
+      - dynamodb:DescribeTable
+  
+  dynamodb:Scan:
+    actions:
+      - dynamodb:Scan
+    dependencies:
+      - dynamodb:DescribeTable
+  
+  dynamodb:BatchGetItem:
+    actions:
+      - dynamodb:BatchGetItem
+    dependencies:
+      - dynamodb:DescribeTable
+  
+  dynamodb:BatchWriteItem:
+    actions:
+      - dynamodb:BatchWriteItem
+    dependencies:
+      - dynamodb:DescribeTable

@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AWS IAM Policy Generator - Examples</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 2rem;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    header {
+      text-align: center;
+      color: white;
+      margin-bottom: 3rem;
+    }
+    
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    }
+    
+    .subtitle {
+      font-size: 1.2rem;
+      opacity: 0.95;
+      margin-bottom: 2rem;
+    }
+    
+    .badges {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      margin-bottom: 2rem;
+    }
+    
+    .badge {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    .examples-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 2rem;
+      margin-bottom: 3rem;
+    }
+    
+    .example-card {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .example-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+    }
+    
+    .example-card h3 {
+      color: #2c3e50;
+      margin-bottom: 1rem;
+      font-size: 1.5rem;
+    }
+    
+    .example-card p {
+      color: #7f8c8d;
+      margin-bottom: 1.5rem;
+      line-height: 1.6;
+    }
+    
+    .example-card .features {
+      list-style: none;
+      margin-bottom: 1.5rem;
+    }
+    
+    .example-card .features li {
+      padding: 0.5rem 0;
+      color: #34495e;
+      position: relative;
+      padding-left: 1.5rem;
+    }
+    
+    .example-card .features li:before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      color: #27ae60;
+      font-weight: bold;
+    }
+    
+    .example-card .buttons {
+      display: flex;
+      gap: 1rem;
+    }
+    
+    .btn {
+      flex: 1;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      text-decoration: none;
+      text-align: center;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+      font-size: 0.95rem;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+    }
+    
+    .btn-secondary {
+      background: #f8f9fa;
+      color: #495057;
+      border: 1px solid #dee2e6;
+    }
+    
+    .btn-secondary:hover {
+      background: #e9ecef;
+    }
+    
+    .demo-section {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+    
+    .demo-section h2 {
+      color: #2c3e50;
+      margin-bottom: 1.5rem;
+      font-size: 2rem;
+    }
+    
+    .code-block {
+      background: #2c3e50;
+      color: #ecf0f1;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+    }
+    
+    .code-block code {
+      font-family: 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+    
+    .highlight {
+      color: #f39c12;
+    }
+    
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin: 2rem 0;
+    }
+    
+    .feature-item {
+      text-align: center;
+      padding: 1.5rem;
+      background: #f8f9fa;
+      border-radius: 8px;
+      transition: background 0.3s ease;
+    }
+    
+    .feature-item:hover {
+      background: #e9ecef;
+    }
+    
+    .feature-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+    
+    .feature-title {
+      color: #2c3e50;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    
+    .feature-desc {
+      color: #7f8c8d;
+      font-size: 0.9rem;
+    }
+    
+    footer {
+      text-align: center;
+      color: white;
+      padding: 2rem 0;
+    }
+    
+    footer a {
+      color: white;
+      text-decoration: underline;
+    }
+    
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 2rem;
+      }
+      
+      .examples-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .badges {
+        flex-wrap: wrap;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🚀 AWS IAM Policy Generator</h1>
+      <p class="subtitle">Drop-in React Components for AWS Policy Generation</p>
+      <div class="badges">
+        <span class="badge">v0.1.0</span>
+        <span class="badge">React 18+</span>
+        <span class="badge">TypeScript</span>
+        <span class="badge">Responsive</span>
+      </div>
+    </header>
+
+    <div class="examples-grid">
+      <div class="example-card">
+        <h3>📱 Basic Example</h3>
+        <p>Simple integration with ARN dropdown support and automatic dependency resolution. Perfect for getting started quickly.</p>
+        <ul class="features">
+          <li>ARN dropdown selection</li>
+          <li>Auto dependency resolution</li>
+          <li>Responsive layout</li>
+          <li>Light/Dark themes</li>
+        </ul>
+        <div class="buttons">
+          <a href="basic-example.html" class="btn btn-primary">View Demo</a>
+          <a href="#" class="btn btn-secondary">View Code</a>
+        </div>
+      </div>
+
+      <div class="example-card">
+        <h3>⚡ Headless Mode</h3>
+        <p>Use the core logic without UI components for custom implementations.</p>
+        <ul class="features">
+          <li>Framework agnostic</li>
+          <li>Server-side compatible</li>
+          <li>CLI tools</li>
+          <li>API integration</li>
+        </ul>
+        <div class="buttons">
+          <a href="headless-demo.html" class="btn btn-primary">View Demo</a>
+          <a href="#" class="btn btn-secondary">View Code</a>
+        </div>
+      </div>
+
+      <div class="example-card">
+        <h3>🌍 Multi-language</h3>
+        <p>Internationalization support with built-in translations.</p>
+        <ul class="features">
+          <li>English</li>
+          <li>Korean (한국어)</li>
+          <li>Japanese (日本語)</li>
+          <li>Chinese (中文)</li>
+        </ul>
+        <div class="buttons">
+          <a href="i18n-demo.html" class="btn btn-primary">View Demo</a>
+          <a href="#" class="btn btn-secondary">View Code</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="demo-section">
+      <h2>✨ Key Features</h2>
+      <div class="feature-grid">
+        <div class="feature-item">
+          <div class="feature-icon">🎯</div>
+          <div class="feature-title">ARN Dropdown</div>
+          <div class="feature-desc">Smart ARN selection with service filtering</div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">🔗</div>
+          <div class="feature-title">Auto Dependencies</div>
+          <div class="feature-desc">Automatically includes required permissions</div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">📱</div>
+          <div class="feature-title">Responsive</div>
+          <div class="feature-desc">Adapts to any screen size automatically</div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">🔧</div>
+          <div class="feature-title">Customizable</div>
+          <div class="feature-desc">Themes, layouts, and components</div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">📄</div>
+          <div class="feature-title">YAML Config</div>
+          <div class="feature-desc">Maintainable dependency definitions</div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">🌐</div>
+          <div class="feature-title">Multi-format</div>
+          <div class="feature-desc">JSON, YAML, Terraform output</div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">⚡</div>
+          <div class="feature-title">TypeScript</div>
+          <div class="feature-desc">Full type safety and IntelliSense</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="demo-section">
+      <h2>🚀 Quick Start</h2>
+      <div class="code-block">
+        <pre style="margin: 0;"><code><span class="highlight">npm install</span> @awspirin/awspirin-lib</code></pre>
+      </div>
+      
+      <div class="code-block" style="margin-top: 1rem;">
+        <pre style="margin: 0;"><code><span class="highlight">import</span> { PolicyGenerator } <span class="highlight">from</span> '@awspirin/awspirin-lib';
+
+<span class="highlight">function</span> App() {
+  <span class="highlight">const</span> myARNs = [
+    {
+      arn: 'arn:aws:s3:::my-bucket/*',
+      service: 's3',
+      displayName: 'My Bucket'
+    },
+    {
+      arn: 'arn:aws:ec2:*:*:instance/*',
+      service: 'ec2',
+      displayName: 'EC2 Instances'
+    }
+  ];
+
+  <span class="highlight">return</span> (
+    &lt;PolicyGenerator
+      arnList={myARNs}
+      arnInputMode="auto"
+      layout="responsive"
+      onChange={(policy) =&gt; console.log(policy)}
+    /&gt;
+  );
+}</code></pre>
+      </div>
+    </div>
+
+    <footer>
+      <p>Built with ❤️ by the AWSpirin Team</p>
+      <p style="margin-top: 1rem;">
+        <a href="https://github.com/raccoonyy/awspirin-lib">GitHub</a> · 
+        <a href="https://www.npmjs.com/package/@awspirin/awspirin-lib">NPM</a> · 
+      </p>
+    </footer>
+  </div>
+</body>
+</html>

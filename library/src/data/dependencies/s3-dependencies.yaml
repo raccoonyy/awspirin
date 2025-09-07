@@ -1,0 +1,68 @@
+service: s3
+dependencies:
+  s3:ListBucket:
+    actions:
+      - s3:ListBucket
+    dependencies: []
+  
+  s3:GetBucketLocation:
+    actions:
+      - s3:GetBucketLocation
+    dependencies: []
+  
+  s3:GetObject:
+    actions:
+      - s3:GetObject
+    dependencies:
+      - s3:ListBucket
+      - s3:GetBucketLocation
+  
+  s3:PutObject:
+    actions:
+      - s3:PutObject
+    dependencies:
+      - s3:ListBucket
+  
+  s3:DeleteObject:
+    actions:
+      - s3:DeleteObject
+    dependencies:
+      - s3:ListBucket
+  
+  s3:GetObjectVersion:
+    actions:
+      - s3:GetObjectVersion
+    dependencies:
+      - s3:ListBucket
+      - s3:ListBucketVersions
+  
+  s3:ListBucketVersions:
+    actions:
+      - s3:ListBucketVersions
+    dependencies:
+      - s3:ListBucket
+  
+  s3:PutObjectAcl:
+    actions:
+      - s3:PutObjectAcl
+    dependencies:
+      - s3:GetObjectAcl
+  
+  s3:GetObjectAcl:
+    actions:
+      - s3:GetObjectAcl
+    dependencies:
+      - s3:GetObject
+  
+  s3:RestoreObject:
+    actions:
+      - s3:RestoreObject
+    dependencies:
+      - s3:GetObject
+  
+  s3:DeleteBucket:
+    actions:
+      - s3:DeleteBucket
+    dependencies:
+      - s3:ListBucket
+      - s3:DeleteObject

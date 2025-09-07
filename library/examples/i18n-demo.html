@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>i18n Demo - AWS IAM Policy Generator</title>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    
+    .demo-container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 1rem;
+      color: white;
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 6px;
+      backdrop-filter: blur(10px);
+    }
+    
+    .back-link:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+    
+    .demo-header {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+    
+    .language-controls {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      justify-content: center;
+    }
+    
+    .language-btn {
+      padding: 0.75rem 1.5rem;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+      font-weight: 500;
+    }
+    
+    .language-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+    
+    .language-btn.active {
+      background: white;
+      color: #667eea;
+      border-color: white;
+    }
+    
+    .demo-content {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+    
+    .policy-generator {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 2rem;
+    }
+    
+    @media (max-width: 768px) {
+      .policy-generator {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+      }
+      
+      .language-controls {
+        flex-wrap: wrap;
+      }
+    }
+    
+    .section {
+      padding: 1.5rem;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border: 1px solid #e9ecef;
+    }
+    
+    .section h3 {
+      margin: 0 0 1rem 0;
+      color: #2c3e50;
+      font-size: 1.1rem;
+    }
+    
+    .resource-list,
+    .action-list {
+      list-style: none;
+      padding: 0;
+    }
+    
+    .resource-item,
+    .action-item {
+      padding: 0.75rem;
+      margin-bottom: 0.5rem;
+      background: white;
+      border-radius: 6px;
+      border: 1px solid #dee2e6;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .resource-item:hover,
+    .action-item:hover {
+      border-color: #667eea;
+      box-shadow: 0 2px 4px rgba(102, 126, 234, 0.1);
+    }
+    
+    .resource-item.selected,
+    .action-item.selected {
+      background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+      border-color: #667eea;
+    }
+    
+    .checkbox {
+      width: 20px;
+      height: 20px;
+      border: 2px solid #dee2e6;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+    
+    .checkbox.checked {
+      background: #667eea;
+      border-color: #667eea;
+    }
+    
+    .checkbox.checked::after {
+      content: '✓';
+      color: white;
+      font-size: 12px;
+    }
+    
+    .arn-input {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #dee2e6;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+    }
+    
+    .policy-output {
+      background: #2c3e50;
+      color: #ecf0f1;
+      padding: 1rem;
+      border-radius: 6px;
+      font-family: 'Monaco', 'Courier New', monospace;
+      font-size: 0.85rem;
+      max-height: 400px;
+      overflow: auto;
+    }
+    
+    .dependency-notice {
+      background: #fff3cd;
+      border: 1px solid #ffeaa7;
+      border-radius: 6px;
+      padding: 0.75rem;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+    }
+    
+    .dependency-notice strong {
+      color: #856404;
+    }
+    
+    .dependency-list {
+      list-style: none;
+      padding-left: 1rem;
+      margin-top: 0.5rem;
+    }
+    
+    .dependency-list li:before {
+      content: '→ ';
+      font-weight: bold;
+      color: #856404;
+    }
+  </style>
+</head>
+<body>
+  <div class="demo-container">
+    <a href="index.html" class="back-link">← Back to Examples</a>
+    
+    <div class="demo-header">
+      <h1>🌍 Multi-language Demo</h1>
+      <p>
+        This demo shows how the AWS IAM Policy Generator supports multiple languages.
+        Switch between languages to see the UI update in real-time. The dependency resolution
+        feature works consistently across all languages.
+      </p>
+      
+      <div class="language-controls">
+        <button class="language-btn active" data-lang="en">🇺🇸 English</button>
+        <button class="language-btn" data-lang="ko">🇰🇷 한국어</button>
+        <button class="language-btn" data-lang="ja">🇯🇵 日本語</button>
+        <button class="language-btn" data-lang="zh">🇨🇳 中文</button>
+      </div>
+    </div>
+    
+    <div class="demo-content">
+      <div id="root"></div>
+    </div>
+  </div>
+
+  <script type="text/babel">
+    const translations = {
+      en: {
+        selectResource: 'Select Resource',
+        configureActions: 'Configure Actions',
+        generatedPolicy: 'Generated Policy',
+        enterArn: 'Enter ARN...',
+        dependencyNotice: 'Dependencies automatically resolved',
+        resources: {
+          's3': 'S3 Bucket',
+          'ec2': 'EC2 Instance', 
+          'lambda': 'Lambda Function',
+          'dynamodb': 'DynamoDB Table'
+        },
+        actions: {
+          's3:ListBucket': 'List Bucket',
+          's3:GetBucketLocation': 'Get Bucket Location',
+          's3:GetObject': 'Get Object',
+          's3:PutObject': 'Put Object',
+          's3:DeleteObject': 'Delete Object',
+          'ec2:DescribeInstances': 'Describe Instances',
+          'ec2:StartInstances': 'Start Instances',
+          'ec2:StopInstances': 'Stop Instances',
+          'ec2:TerminateInstances': 'Terminate Instances',
+          'lambda:GetFunction': 'Get Function',
+          'lambda:InvokeFunction': 'Invoke Function',
+          'lambda:UpdateFunctionCode': 'Update Function Code',
+          'lambda:DeleteFunction': 'Delete Function',
+          'dynamodb:DescribeTable': 'Describe Table',
+          'dynamodb:GetItem': 'Get Item',
+          'dynamodb:PutItem': 'Put Item',
+          'dynamodb:Query': 'Query',
+          'dynamodb:Scan': 'Scan'
+        }
+      },
+      ko: {
+        selectResource: '리소스 선택',
+        configureActions: '액션 구성',
+        generatedPolicy: '생성된 정책',
+        enterArn: 'ARN 입력...',
+        dependencyNotice: '의존성이 자동으로 해결됨',
+        resources: {
+          's3': 'S3 버킷',
+          'ec2': 'EC2 인스턴스',
+          'lambda': 'Lambda 함수',
+          'dynamodb': 'DynamoDB 테이블'
+        },
+        actions: {
+          's3:ListBucket': '버킷 목록',
+          's3:GetBucketLocation': '버킷 위치 조회',
+          's3:GetObject': '객체 가져오기',
+          's3:PutObject': '객체 업로드',
+          's3:DeleteObject': '객체 삭제',
+          'ec2:DescribeInstances': '인스턴스 조회',
+          'ec2:StartInstances': '인스턴스 시작',
+          'ec2:StopInstances': '인스턴스 중지',
+          'ec2:TerminateInstances': '인스턴스 종료',
+          'lambda:GetFunction': '함수 조회',
+          'lambda:InvokeFunction': '함수 실행',
+          'lambda:UpdateFunctionCode': '함수 코드 업데이트',
+          'lambda:DeleteFunction': '함수 삭제',
+          'dynamodb:DescribeTable': '테이블 조회',
+          'dynamodb:GetItem': '항목 조회',
+          'dynamodb:PutItem': '항목 추가',
+          'dynamodb:Query': '쿼리',
+          'dynamodb:Scan': '스캔'
+        }
+      },
+      ja: {
+        selectResource: 'リソース選択',
+        configureActions: 'アクション設定',
+        generatedPolicy: '生成されたポリシー',
+        enterArn: 'ARN を入力...',
+        dependencyNotice: '依存関係を自動解決',
+        resources: {
+          's3': 'S3 バケット',
+          'ec2': 'EC2 インスタンス',
+          'lambda': 'Lambda 関数',
+          'dynamodb': 'DynamoDB テーブル'
+        },
+        actions: {
+          's3:ListBucket': 'バケット一覧',
+          's3:GetBucketLocation': 'バケット場所取得',
+          's3:GetObject': 'オブジェクト取得',
+          's3:PutObject': 'オブジェクト配置',
+          's3:DeleteObject': 'オブジェクト削除',
+          'ec2:DescribeInstances': 'インスタンス記述',
+          'ec2:StartInstances': 'インスタンス開始',
+          'ec2:StopInstances': 'インスタンス停止',
+          'ec2:TerminateInstances': 'インスタンス終了',
+          'lambda:GetFunction': '関数取得',
+          'lambda:InvokeFunction': '関数実行',
+          'lambda:UpdateFunctionCode': '関数コード更新',
+          'lambda:DeleteFunction': '関数削除',
+          'dynamodb:DescribeTable': 'テーブル記述',
+          'dynamodb:GetItem': 'アイテム取得',
+          'dynamodb:PutItem': 'アイテム配置',
+          'dynamodb:Query': 'クエリ',
+          'dynamodb:Scan': 'スキャン'
+        }
+      },
+      zh: {
+        selectResource: '选择资源',
+        configureActions: '配置操作',
+        generatedPolicy: '生成的策略',
+        enterArn: '输入ARN...',
+        dependencyNotice: '自动解析依赖关系',
+        resources: {
+          's3': 'S3 存储桶',
+          'ec2': 'EC2 实例',
+          'lambda': 'Lambda 函数',
+          'dynamodb': 'DynamoDB 表'
+        },
+        actions: {
+          's3:ListBucket': '列出存储桶',
+          's3:GetBucketLocation': '获取存储桶位置',
+          's3:GetObject': '获取对象',
+          's3:PutObject': '上传对象',
+          's3:DeleteObject': '删除对象',
+          'ec2:DescribeInstances': '描述实例',
+          'ec2:StartInstances': '启动实例',
+          'ec2:StopInstances': '停止实例',
+          'ec2:TerminateInstances': '终止实例',
+          'lambda:GetFunction': '获取函数',
+          'lambda:InvokeFunction': '调用函数',
+          'lambda:UpdateFunctionCode': '更新函数代码',
+          'lambda:DeleteFunction': '删除函数',
+          'dynamodb:DescribeTable': '描述表',
+          'dynamodb:GetItem': '获取项目',
+          'dynamodb:PutItem': '放置项目',
+          'dynamodb:Query': '查询',
+          'dynamodb:Scan': '扫描'
+        }
+      }
+    };
+
+    function I18nPolicyGenerator() {
+      const [currentLang, setCurrentLang] = React.useState('en');
+      const [selectedResource, setSelectedResource] = React.useState('');
+      const [selectedActions, setSelectedActions] = React.useState([]);
+      const [arn, setArn] = React.useState('');
+      
+      const t = translations[currentLang];
+      
+      const resources = [
+        { id: 's3', service: 's3' },
+        { id: 'ec2', service: 'ec2' },
+        { id: 'lambda', service: 'lambda' },
+        { id: 'dynamodb', service: 'dynamodb' }
+      ];
+      
+      const actions = {
+        s3: ['s3:ListBucket', 's3:GetBucketLocation', 's3:GetObject', 's3:PutObject', 's3:DeleteObject'],
+        ec2: ['ec2:DescribeInstances', 'ec2:StartInstances', 'ec2:StopInstances', 'ec2:TerminateInstances'],
+        lambda: ['lambda:GetFunction', 'lambda:InvokeFunction', 'lambda:UpdateFunctionCode', 'lambda:DeleteFunction'],
+        dynamodb: ['dynamodb:DescribeTable', 'dynamodb:GetItem', 'dynamodb:PutItem', 'dynamodb:Query', 'dynamodb:Scan']
+      };
+      
+      // Dependency resolution
+      const resolveDependencies = (actions) => {
+        const deps = {
+          's3:GetObject': ['s3:ListBucket', 's3:GetBucketLocation'],
+          's3:PutObject': ['s3:ListBucket'],
+          's3:DeleteObject': ['s3:ListBucket'],
+          'ec2:TerminateInstances': ['ec2:DescribeInstances'],
+          'ec2:StopInstances': ['ec2:DescribeInstances'],
+          'ec2:StartInstances': ['ec2:DescribeInstances'],
+          'lambda:InvokeFunction': ['lambda:GetFunction'],
+          'lambda:UpdateFunctionCode': ['lambda:GetFunction'],
+          'lambda:DeleteFunction': ['lambda:GetFunction'],
+          'dynamodb:GetItem': ['dynamodb:DescribeTable'],
+          'dynamodb:PutItem': ['dynamodb:DescribeTable'],
+          'dynamodb:Query': ['dynamodb:DescribeTable'],
+          'dynamodb:Scan': ['dynamodb:DescribeTable']
+        };
+
+        const resolved = new Set(actions);
+        actions.forEach(action => {
+          if (deps[action]) {
+            deps[action].forEach(dep => resolved.add(dep));
+          }
+        });
+        return Array.from(resolved).sort();
+      };
+      
+      const resolvedActions = resolveDependencies(selectedActions);
+      const hasAutoResolvedDeps = resolvedActions.length > selectedActions.length;
+      
+      const policy = resolvedActions.length > 0 && arn ? {
+        Version: '2012-10-17',
+        Statement: [{
+          Effect: 'Allow',
+          Action: resolvedActions,
+          Resource: arn
+        }]
+      } : { Version: '2012-10-17', Statement: [] };
+      
+      React.useEffect(() => {
+        // Language button handlers
+        document.querySelectorAll('.language-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            document.querySelectorAll('.language-btn').forEach(b => b.classList.remove('active'));
+            e.currentTarget.classList.add('active');
+            setCurrentLang(e.currentTarget.dataset.lang);
+          });
+        });
+      }, []);
+      
+      return (
+        <div className="policy-generator">
+          {/* Resources Section */}
+          <div className="section">
+            <h3>🎯 {t.selectResource}</h3>
+            <ul className="resource-list">
+              {resources.map(resource => (
+                <li
+                  key={resource.id}
+                  className={`resource-item ${selectedResource === resource.id ? 'selected' : ''}`}
+                  onClick={() => {
+                    setSelectedResource(resource.id);
+                    setSelectedActions([]);
+                  }}
+                >
+                  <div className={`checkbox ${selectedResource === resource.id ? 'checked' : ''}`}></div>
+                  <span>{t.resources[resource.id]}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          
+          {/* Actions Section */}
+          <div className="section">
+            <h3>⚡ {t.configureActions}</h3>
+            <input
+              type="text"
+              className="arn-input"
+              placeholder={t.enterArn}
+              value={arn}
+              onChange={(e) => setArn(e.target.value)}
+            />
+            
+            {hasAutoResolvedDeps && (
+              <div className="dependency-notice">
+                <strong>{t.dependencyNotice}</strong>
+                <ul className="dependency-list">
+                  {resolvedActions.filter(action => !selectedActions.includes(action)).map(dep => (
+                    <li key={dep}>{t.actions[dep] || dep}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            
+            <ul className="action-list">
+              {selectedResource && actions[selectedResource]?.map(action => (
+                <li
+                  key={action}
+                  className={`action-item ${selectedActions.includes(action) ? 'selected' : ''}`}
+                  onClick={() => {
+                    if (selectedActions.includes(action)) {
+                      setSelectedActions(selectedActions.filter(a => a !== action));
+                    } else {
+                      setSelectedActions([...selectedActions, action]);
+                    }
+                  }}
+                >
+                  <div className={`checkbox ${selectedActions.includes(action) ? 'checked' : ''}`}></div>
+                  <span>{t.actions[action] || action}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          
+          {/* Policy Section */}
+          <div className="section">
+            <h3>📋 {t.generatedPolicy}</h3>
+            <div className="policy-output">
+              <pre style={{ margin: 0 }}>{JSON.stringify(policy, null, 2)}</pre>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    
+    ReactDOM.render(<I18nPolicyGenerator />, document.getElementById('root'));
+  </script>
+</body>
+</html>
