@@ -1,275 +1,105 @@
-# Development Guide
+# 개발 가이드
 
-## Project Overview
+## 🏗️ 기술 스택
 
-This project contains both a React application and a Web Component library for AWS IAM Policy generation, sharing common logic through a shared directory.
+### 웹 애플리케이션
+- **Frontend**: React 18+ with TypeScript
+- **Framework**: Next.js 14 (Static Export)
+- **UI Library**: shadcn/ui
+- **Styling**: Tailwind CSS
+- **Deployment**: GitHub Pages with GitHub Actions
 
-## Architecture
+### React 컴포넌트 라이브러리
+- **Framework**: React 18+ with TypeScript
+- **Build Tool**: Vite
+- **Testing**: Jest + Testing Library
+- **Bundling**: ESM/CJS dual export
 
-### Shared Logic (`shared/`)
-- **Types**: Common TypeScript interfaces
-- **Data**: AWS service and action definitions
-- **Utils**: Policy generation and ARN processing logic
+## 🚀 배포
 
-### React Application (`awspirin/`)
-- Full-featured web application
-- shadcn/ui components
-- Internationalization (Korean/English)
-- Analytics integration
-- Next.js framework
+이 프로젝트는 GitHub Actions를 통해 자동으로 배포됩니다:
 
-### Web Component (`awspirin-webcomponent/`)
-- Framework-agnostic Lit-based component
-- Minimal dependencies
-- CSS variable theming
-- Event-driven API
+### Production 배포
+- `main` 브랜치에 푸시하면 자동으로 GitHub Pages에 배포
+- URL: `https://your-username.github.io/awspirin/`
 
-## Development Setup
+### PR 미리보기
+- 새 PR 생성 시 자동으로 미리보기 환경 생성
+- URL: `https://your-username.github.io/awspirin/preview/branch-name/`
+- PR 코멘트에 미리보기 링크 자동 추가
+- PR 종료 시 미리보기 환경 자동 정리
 
-### Prerequisites
-- Node.js 18+
-- npm or yarn
+## 💻 로컬 개발
 
-### Installation
-
-1. **React Application**
 ```bash
-cd awspirin
+# 의존성 설치
 npm install
-```
 
-2. **Web Component**
-```bash
-cd awspirin-webcomponent
-npm install
-```
+# 환경 변수 설정 (선택사항)
+cp .env.local.example .env.local
+# .env.local 파일에서 GA4_ID 설정
 
-### Development Commands
-
-#### React Application
-```bash
-cd awspirin
-npm run dev          # Start development server (http://localhost:3000)
-npm run build        # Build for production
-npm run start        # Start production server
-npm run lint         # Run ESLint
-npm run export       # Export static files
-```
-
-#### Web Component
-```bash
-cd awspirin-webcomponent
-npm run dev          # Start development server with examples
-npm run build        # Build library for distribution
-npm run test         # Run unit tests
-npm run test:watch   # Run tests in watch mode
-npm run lint         # Run ESLint
-npm run preview      # Preview built library
-```
-
-## Development Workflow
-
-### Adding New AWS Services
-
-1. **Update Shared Data**
-   - Add service to `shared/data/aws-resources.ts`
-   - Add actions to `shared/data/aws-actions.ts`
-   - Update ARN processing in `shared/utils/policy-generator.ts` if needed
-
-2. **Update React App**
-   - Add translations in `awspirin/lib/i18n/`
-   - Test in development mode
-
-3. **Update Web Component**
-   - Test with new service data
-   - Update examples if needed
-
-### Adding New Features
-
-1. **Shared Logic First**
-   - Add utilities to `shared/utils/`
-   - Add types to `shared/types/`
-   - Write tests for shared logic
-
-2. **Implement in Both Versions**
-   - React: Update components in `awspirin/components/`
-   - Web Component: Update `awspirin-webcomponent/src/components/`
-
-3. **Update Documentation**
-   - Update README files
-   - Add usage examples
-   - Update API documentation
-
-## Testing
-
-### Unit Tests (Web Component)
-```bash
-cd awspirin-webcomponent
-npm test
-```
-
-Tests are located in `awspirin-webcomponent/src/test/` and cover:
-- Policy generation logic
-- ARN validation and processing
-- Component behavior
-
-### Manual Testing
-
-1. **React App Testing**
-   - Run `npm run dev` in `awspirin/`
-   - Test all features in browser
-   - Check mobile responsiveness
-   - Test internationalization
-
-2. **Web Component Testing**
-   - Run `npm run dev` in `awspirin-webcomponent/`
-   - Open `src/dev.html` in browser
-   - Test different configurations
-   - Check event handling
-
-## Code Style
-
-### ESLint Configuration
-Both projects use ESLint with TypeScript support:
-- Airbnb style guide compliance
-- TypeScript-specific rules
-- Consistent formatting
-
-### Naming Conventions
-- **Files**: kebab-case (`aws-policy-generator.ts`)
-- **Components**: PascalCase (`AWSPolicyGenerator`)
-- **Variables**: camelCase (`selectedResources`)
-- **Constants**: UPPER_SNAKE_CASE (`DEFAULT_AWS_RESOURCES`)
-
-### Import Organization
-```typescript
-// External libraries
-import { LitElement, html, css } from 'lit'
-
-// Shared utilities
-import { generateIAMPolicy } from '@shared/utils/policy-generator'
-
-// Local components
-import { ResourceSelector } from './resource-selector'
-```
-
-## Build Process
-
-### React Application Build
-- Next.js handles bundling and optimization
-- Static export for GitHub Pages deployment
-- Automatic code splitting and optimization
-
-### Web Component Build
-- Vite for fast development and building
-- Rollup for library bundling
-- TypeScript compilation with declaration files
-- Terser for minification
-
-## Deployment
-
-### React Application
-- Deployed to GitHub Pages via GitHub Actions
-- Static export with proper routing
-- SEO optimization included
-
-### Web Component Library
-- Published to npm as `@awspirin/policy-generator`
-- ESM format for modern bundlers
-- TypeScript declarations included
-- Minimal external dependencies
-
-## Debugging
-
-### Common Issues
-
-1. **Import Path Issues**
-   - Check `tsconfig.json` path mappings
-   - Ensure shared directory is properly referenced
-
-2. **Build Failures**
-   - Clear `node_modules` and reinstall
-   - Check TypeScript errors
-   - Verify all imports are correct
-
-3. **Component Not Rendering**
-   - Check web component registration
-   - Verify CSS variables are set
-   - Check browser console for errors
-
-### Debug Tools
-
-1. **React Developer Tools**
-   - Install browser extension
-   - Inspect component state and props
-
-2. **Lit Developer Tools**
-   - Use browser dev tools
-   - Check custom element properties
-
-3. **Network Tab**
-   - Verify resource loading
-   - Check for CORS issues
-
-## Performance Considerations
-
-### Bundle Size Optimization
-- Tree-shaking for unused code
-- Dynamic imports for large features
-- Minimal external dependencies
-
-### Runtime Performance
-- Efficient state management
-- Debounced input handling
-- Virtual scrolling for large lists (if needed)
-
-### Memory Management
-- Proper event listener cleanup
-- Avoid memory leaks in long-running apps
-
-## Contributing Guidelines
-
-1. **Code Quality**
-   - Write tests for new features
-   - Follow existing code style
-   - Add TypeScript types for all new code
-
-2. **Documentation**
-   - Update README files
-   - Add JSDoc comments for public APIs
-   - Include usage examples
-
-3. **Compatibility**
-   - Maintain backward compatibility
-   - Test in multiple browsers
-   - Consider mobile devices
-
-4. **Review Process**
-   - Create feature branches
-   - Submit pull requests
-   - Address review feedback
-
-## Troubleshooting
-
-### Development Server Issues
-```bash
-# Clear cache and restart
-rm -rf node_modules package-lock.json
-npm install
+# 개발 서버 실행
 npm run dev
-```
 
-### Build Issues
-```bash
-# Clean build
-npm run clean  # if available
+# 프로덕션 빌드
+npm run build
+
+# 정적 파일 생성 (GitHub Pages용)
 npm run build
 ```
 
-### Test Issues
+## 💻 라이브러리 개발
+
 ```bash
-# Update test snapshots
-npm test -- --update-snapshots
+# 라이브러리 디렉토리로 이동
+cd library
+
+# 의존성 설치
+npm install
+
+# 개발 서버 실행
+npm run dev
+
+# 빌드
+npm run build
+
+# 테스트
+npm run test
 ```
 
-For more specific issues, check the individual README files in each project directory.
+## 📊 분석 설정
+
+### Google Analytics 4 설정
+
+1. **GA4 계정 생성**: [Google Analytics](https://analytics.google.com/)에서 계정 생성
+2. **측정 ID 확인**: 데이터 스트림 생성 후 측정 ID 확인 (G-XXXXXXXXXX)
+3. **GitHub Secrets 설정**:
+   - Repository Settings → Secrets and variables → Actions
+   - `GA4_ID` secret 추가 (예: G-XXXXXXXXXX)
+4. **로컬 개발**: `.env.local` 파일에 `NEXT_PUBLIC_GA4_ID=G-XXXXXXXXXX` 추가
+
+### 추적되는 이벤트
+
+- **resource_toggle**: AWS 리소스 선택/해제
+- **action_toggle**: 권한 액션 선택/해제  
+- **arn_input**: ARN 입력
+- **policy_copy**: 정책 복사
+
+### GA4에서 확인할 수 있는 데이터
+
+- 실시간 방문자 수
+- 사용자 행동 패턴
+- 이벤트 발생 통계
+- Facebook Pixel
+- 기타 마케팅/분석 도구
+
+## 🤝 기여
+
+이슈 리포트와 풀 리퀘스트를 환영합니다!
+
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request

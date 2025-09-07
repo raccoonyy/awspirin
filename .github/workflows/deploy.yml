@@ -1,0 +1,250 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+  pull-requests: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    environment:
+      name: github-pages
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Check project structure
+        run: |
+          echo "Repository root contents:"
+          ls -la
+          echo ""
+          if [ -f "package.json" ]; then
+            echo "✅ Found package.json in root"
+            echo "PROJECT_DIR=." >> $GITHUB_ENV
+          elif [ -f "awspirin/package.json" ]; then
+            echo "✅ Found package.json in awspirin/"
+            echo "PROJECT_DIR=awspirin" >> $GITHUB_ENV
+          else
+            echo "❌ package.json not found!"
+            exit 1
+          fi
+
+      - name: Cache npm dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install dependencies
+        run: |
+          cd ${{ env.PROJECT_DIR }}
+          npm ci
+
+      - name: Build application
+        env:
+          NODE_ENV: production
+          GITHUB_ACTIONS: true
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          NEXT_PUBLIC_GA4_ID: ${{ secrets.NEXT_PUBLIC_GA4_ID }}
+          NEXT_PUBLIC_GTM_ID: ${{ secrets.NEXT_PUBLIC_GTM_ID }}
+          NEXT_PUBLIC_ENABLE_ANALYTICS: true
+        run: |
+          cd ${{ env.PROJECT_DIR }}
+          echo "Building with repository: $GITHUB_REPOSITORY"
+          echo "Repository name: $(echo $GITHUB_REPOSITORY | cut -d'/' -f2)"
+          echo "GA4 enabled: ${{ secrets.NEXT_PUBLIC_GA4_ID != '' }}"
+          npm run build:github
+          echo "Build completed. Checking output directory:"
+          ls -la out/ || echo "No out directory found"
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-files
+          path: ${{ env.PROJECT_DIR }}/out/
+
+  # Main branch deployment
+  deploy-main:
+    if: github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-files
+          path: ./out
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload to GitHub Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./out
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  # PR preview deployment
+  deploy-preview:
+    if: github.event_name == 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-files
+          path: ./out
+
+      - name: Get branch name
+        id: branch
+        run: |
+          branch_name="${{ github.head_ref }}"
+          # Replace special characters with hyphens for valid subdirectory names
+          clean_branch=$(echo "$branch_name" | sed 's/[^a-zA-Z0-9]/-/g' | sed 's/--*/-/g' | sed 's/^-\|-$//g')
+          echo "name=$clean_branch" >> $GITHUB_OUTPUT
+          echo "original=$branch_name" >> $GITHUB_OUTPUT
+
+      - name: Deploy to preview branch
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./out
+          destination_dir: preview/${{ steps.branch.outputs.name }}
+          keep_files: true
+
+      - name: Comment PR with preview link
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const branchName = '${{ steps.branch.outputs.name }}';
+            const originalBranch = '${{ steps.branch.outputs.original }}';
+            const repoName = context.repo.repo;
+            const previewUrl = `https://${{ github.repository_owner }}.github.io/${repoName}/preview/${branchName}/`;
+            
+            const comment = `## 🚀 Preview Deployment
+            
+            Your changes have been deployed to a preview environment!
+            
+            **Preview URL:** ${previewUrl}
+            **Branch:** \`${originalBranch}\`
+            
+            The preview will be updated automatically when you push new commits to this PR.
+            
+            ---
+            *This preview will be automatically cleaned up when the PR is merged or closed.*`;
+            
+            // Check if we already commented
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            
+            const existingComment = comments.find(comment => 
+              comment.body.includes('🚀 Preview Deployment')
+            );
+            
+            if (existingComment) {
+              // Update existing comment
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existingComment.id,
+                body: comment
+              });
+            } else {
+              // Create new comment
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: comment
+              });
+            }
+
+  # Cleanup preview when PR is closed
+  cleanup-preview:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Check if gh-pages branch exists
+        id: check-branch
+        run: |
+          if git ls-remote --heads origin gh-pages | grep -q gh-pages; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "✅ gh-pages branch exists"
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "❌ gh-pages branch does not exist"
+          fi
+
+      - name: Checkout gh-pages branch
+        if: steps.check-branch.outputs.exists == 'true'
+        run: |
+          git checkout gh-pages
+
+      - name: Get branch name
+        id: branch
+        run: |
+          branch_name="${{ github.head_ref }}"
+          clean_branch=$(echo "$branch_name" | sed 's/[^a-zA-Z0-9]/-/g' | sed 's/--*/-/g' | sed 's/^-\|-$//g')
+          echo "name=$clean_branch" >> $GITHUB_OUTPUT
+
+      - name: Remove preview directory
+        if: steps.check-branch.outputs.exists == 'true'
+        run: |
+          if [ -d "preview/${{ steps.branch.outputs.name }}" ]; then
+            echo "🗑️ Removing preview directory: preview/${{ steps.branch.outputs.name }}"
+            rm -rf "preview/${{ steps.branch.outputs.name }}"
+            git config --local user.email "action@github.com"
+            git config --local user.name "GitHub Action"
+            git add .
+            if git commit -m "Remove preview for ${{ github.head_ref }}"; then
+              git push
+              echo "✅ Preview directory removed and changes pushed"
+            else
+              echo "ℹ️ No changes to commit"
+            fi
+          else
+            echo "ℹ️ Preview directory does not exist: preview/${{ steps.branch.outputs.name }}"
+          fi
+
+      - name: Skip cleanup (no gh-pages branch)
+        if: steps.check-branch.outputs.exists == 'false'
+        run: |
+          echo "ℹ️ Skipping cleanup - gh-pages branch does not exist yet"
+          echo "This is normal for repositories that haven't had any preview deployments yet."
