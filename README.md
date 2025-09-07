@@ -2,6 +2,16 @@
 
 AWS IAM 정책을 시각적으로 생성할 수 있는 웹 컴포넌트 라이브러리입니다. 어떤 웹사이트나 프레임워크에서도 쉽게 사용할 수 있습니다.
 
+🔗 **[라이브 데모 보기](https://awspirin.cloud)** | 📦 **[라이브러리 문서](https://awspirin.cloud/library)** | 🎮 **[플레이그라운드](https://awspirin.cloud/playground)**
+
+## ✨ 핵심 기능: 자동 의존성 해결
+
+AWS IAM 정책 작성 시 가장 어려운 점 중 하나는 필요한 모든 권한을 빠짐없이 포함시키는 것입니다. awspirin은 **자동으로 액션 의존성을 해결**하여 이 문제를 해결합니다.
+
+예를 들어, S3 객체를 읽으려면:
+- ❌ 수동 작성: `s3:GetObject`만 추가하면 실패할 수 있음
+- ✅ awspirin: `s3:GetObject`, `s3:ListBucket`, `s3:GetBucketLocation`을 자동으로 포함
+
 ## 🚀 빠른 시작
 
 ### 1. 설치
