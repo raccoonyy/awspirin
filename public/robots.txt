@@ -1,8 +1,0 @@
-User-agent: *
-Allow: /
-
-# Sitemap
-Sitemap: https://raccoonyy.github.io/awspirin/sitemap.xml
-
-# Crawl-delay for respectful crawling
-Crawl-delay: 1
